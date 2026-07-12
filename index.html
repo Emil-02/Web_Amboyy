@@ -1,0 +1,782 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Portofolio Amboyy — mahasiswa Informatika Unismuh Makassar. Membangun aplikasi mobile & web dengan Flutter, JavaScript/TypeScript, dan eksplorasi AI."
+    />
+    <title>Amboyy ✦ Menjelajah Semesta Digital</title>
+
+    <!-- Favicon planet 🪐 -->
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🪐</text></svg>"
+    />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Poppins:wght@300;400;500;600&family=Orbitron:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <!-- ===== Latar semesta ===== -->
+    <canvas id="starfield" aria-hidden="true"></canvas>
+    <div class="nebula nebula-1" aria-hidden="true"></div>
+    <div class="nebula nebula-2" aria-hidden="true"></div>
+    <div class="nebula nebula-3" aria-hidden="true"></div>
+
+    <!-- ===== Navbar ===== -->
+    <nav class="navbar" id="navbar">
+      <div class="nav-container">
+        <a href="#beranda" class="nav-logo">✦ <span>Amboyy</span></a>
+
+        <ul class="nav-menu" id="nav-menu">
+          <li><a href="#beranda" class="nav-link active">Beranda</a></li>
+          <li><a href="#tentang" class="nav-link">Tentang</a></li>
+          <li><a href="#keahlian" class="nav-link">Keahlian</a></li>
+          <li><a href="#proyek" class="nav-link">Proyek</a></li>
+          <li><a href="#game" class="nav-link">Game 🎮</a></li>
+          <li><a href="#kontak" class="nav-link nav-cta">Kontak 🚀</a></li>
+        </ul>
+
+        <button class="hamburger" id="hamburger" aria-label="Buka menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- ===== Hero ===== -->
+    <header class="hero" id="beranda">
+      <div class="hero-content">
+        <p class="hero-greeting reveal">🛸 Selamat datang di semestaku</p>
+        <h1 class="hero-title reveal delay-1">
+          Halo, aku <span class="gradient-text">Amboyy</span>
+        </h1>
+        <h2 class="hero-typing reveal delay-2">
+          <span id="typing-text"></span><span class="typing-cursor">|</span>
+        </h2>
+        <p class="hero-desc reveal delay-3">
+          Mahasiswa Informatika yang merakit aplikasi mobile, web, dan
+          eksperimen AI menjadi pengalaman yang hidup di galaksi digital.
+          <em>Debug your past, compile your future.</em> ✨
+        </p>
+        <div class="hero-buttons reveal delay-4">
+          <a href="#proyek" class="btn btn-primary">Lihat Proyekku</a>
+          <a href="#kontak" class="btn btn-outline">Hubungi Aku</a>
+        </div>
+        <div class="hero-socials reveal delay-5">
+          <!-- GANTI href dengan link sosial mediamu -->
+          <a
+            href="https://github.com/Emil-02"
+            target="_blank"
+            rel="noopener"
+            aria-label="GitHub"
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.55 0-.27-.01-1.17-.02-2.12-3.2.7-3.88-1.36-3.88-1.36-.52-1.33-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.19 1.76 1.19 1.03 1.76 2.7 1.25 3.35.96.1-.75.4-1.25.72-1.54-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11.1 11.1 0 0 1 5.8 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.42-2.7 5.39-5.26 5.68.41.35.77 1.04.77 2.1 0 1.52-.01 2.75-.01 3.12 0 .3.2.66.8.55A11.52 11.52 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5z"
+              />
+            </svg>
+          </a>
+          <a
+            href="https://linkedin.com/"
+            target="_blank"
+            rel="noopener"
+            aria-label="LinkedIn"
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.34V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.07 2.07 0 1 1 0-4.13 2.07 2.07 0 0 1 0 4.13zM7.12 20.45H3.55V9h3.57v11.45z"
+              />
+            </svg>
+          </a>
+          <a
+            href="https://www.instagram.com/emil.rahmat.737?igsh=MWhxMDQzM3hmZ2Izdw=="
+            target="_blank"
+            rel="noopener"
+            aria-label="Instagram"
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41a3.72 3.72 0 0 1-1.38-.9 3.72 3.72 0 0 1-.9-1.38c-.16-.42-.36-1.06-.41-2.23-.06-1.27-.07-1.65-.07-4.85s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41 1.27-.06 1.65-.07 4.85-.07M12 0C8.74 0 8.33.01 7.05.07 5.78.13 4.9.33 4.14.63c-.79.3-1.46.72-2.13 1.38A5.9 5.9 0 0 0 .63 4.14C.33 4.9.13 5.78.07 7.05.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.06 1.27.26 2.15.56 2.91.3.79.72 1.46 1.38 2.13a5.9 5.9 0 0 0 2.13 1.38c.76.3 1.64.5 2.91.56C8.33 23.99 8.74 24 12 24s3.67-.01 4.95-.07c1.27-.06 2.15-.26 2.91-.56a5.9 5.9 0 0 0 2.13-1.38 5.9 5.9 0 0 0 1.38-2.13c.3-.76.5-1.64.56-2.91.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.06-1.27-.26-2.15-.56-2.91a5.9 5.9 0 0 0-1.38-2.13A5.9 5.9 0 0 0 19.86.63c-.76-.3-1.64-.5-2.91-.56C15.67.01 15.26 0 12 0z"
+              />
+              <path
+                d="M12 5.84A6.16 6.16 0 1 0 18.16 12 6.16 6.16 0 0 0 12 5.84zm0 10.16A4 4 0 1 1 16 12a4 4 0 0 1-4 4z"
+              />
+              <circle cx="18.41" cy="5.59" r="1.44" />
+            </svg>
+          </a>
+          <!-- GANTI nomor/username di bawah dengan akunmu -->
+          <a
+            href="https://wa.me/6281234567890"
+            target="_blank"
+            rel="noopener"
+            aria-label="WhatsApp"
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"
+              />
+            </svg>
+          </a>
+          <a
+            href="https://tiktok.com/@username"
+            target="_blank"
+            rel="noopener"
+            aria-label="TikTok"
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"
+              />
+            </svg>
+          </a>
+          <a
+            href="https://youtube.com/@username"
+            target="_blank"
+            rel="noopener"
+            aria-label="YouTube"
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"
+              />
+            </svg>
+          </a>
+          <a
+            href="https://facebook.com/username"
+            target="_blank"
+            rel="noopener"
+            aria-label="Facebook"
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"
+              />
+            </svg>
+          </a>
+          <a
+            href="https://threads.net/@username"
+            target="_blank"
+            rel="noopener"
+            aria-label="Threads"
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M12.186 24h-.007c-3.581-.024-6.334-1.205-8.184-3.509C2.35 18.44 1.5 15.586 1.472 12.01v-.017c.03-3.579.879-6.43 2.525-8.482C5.845 1.205 8.6.024 12.18 0h.014c2.746.02 5.043.725 6.826 2.098 1.677 1.29 2.858 3.13 3.509 5.467l-2.04.569c-1.104-3.96-3.898-5.984-8.304-6.015-2.91.022-5.11.936-6.54 2.717C4.307 6.504 3.616 8.914 3.589 12c.027 3.086.718 5.496 2.057 7.164 1.43 1.783 3.631 2.698 6.54 2.717 2.623-.02 4.358-.631 5.8-2.045 1.647-1.613 1.618-3.593 1.09-4.798-.31-.71-.873-1.3-1.634-1.75-.192 1.352-.622 2.446-1.284 3.272-.886 1.102-2.14 1.704-3.73 1.79-1.202.065-2.361-.218-3.259-.801-1.063-.689-1.685-1.74-1.752-2.964-.065-1.19.408-2.285 1.33-3.082.88-.76 2.119-1.207 3.583-1.291a13.853 13.853 0 0 1 3.02.142c-.126-.742-.375-1.332-.75-1.757-.513-.586-1.308-.883-2.359-.89h-.029c-.844 0-1.992.232-2.721 1.32L7.734 7.847c.98-1.454 2.568-2.256 4.478-2.256h.044c3.194.02 5.097 1.975 5.287 5.388.108.046.216.094.321.142 1.49.7 2.58 1.761 3.154 3.07.797 1.82.871 4.79-1.548 7.158-1.85 1.81-4.094 2.628-7.277 2.65Zm1.003-11.69c-.242 0-.487.007-.739.021-1.836.103-2.98.946-2.916 2.143.067 1.256 1.452 1.839 2.784 1.767 1.224-.065 2.818-.543 3.086-3.71a10.5 10.5 0 0 0-2.215-.221z"
+              />
+            </svg>
+          </a>
+          <a
+            href="https://x.com/username"
+            target="_blank"
+            rel="noopener"
+            aria-label="X (Twitter)"
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"
+              />
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Planet CSS -->
+      <div class="hero-visual" id="hero-visual">
+        <div class="planet-system">
+          <div class="planet">
+            <div class="planet-surface"></div>
+            <div class="crater crater-1"></div>
+            <div class="crater crater-2"></div>
+            <div class="crater crater-3"></div>
+          </div>
+          <div class="planet-ring"></div>
+          <div class="orbit orbit-1"><span class="moon moon-1"></span></div>
+          <div class="orbit orbit-2"><span class="moon moon-2"></span></div>
+          <div class="floating-astronaut">👨‍🚀</div>
+        </div>
+      </div>
+
+      <a href="#tentang" class="scroll-down" aria-label="Gulir ke bawah">
+        <span class="mouse"><span class="wheel"></span></span>
+        <span class="scroll-text">Jelajahi</span>
+      </a>
+    </header>
+
+    <main>
+      <!-- ===== Tentang ===== -->
+      <section class="section" id="tentang">
+        <div class="container">
+          <p class="section-tag reveal">— 01. Orbit Pertama</p>
+          <h2 class="section-title reveal">
+            Tentang <span class="gradient-text">Aku</span>
+          </h2>
+
+          <div class="about-grid">
+            <div class="about-visual reveal">
+              <div class="avatar-frame">
+                <img src="img/profil.jpeg" alt="Foto Amboyy" />
+                <div class="avatar-orbit"><span></span></div>
+              </div>
+            </div>
+
+            <div class="about-text reveal delay-2">
+              <h3>Mahasiswa Informatika · Unismuh Makassar 🎓</h3>
+              <p>
+                Halo! Aku <strong>Amboyy</strong> — mahasiswa Informatika di
+                <strong>Universitas Muhammadiyah Makassar</strong>. Aku suka
+                membangun aplikasi <strong>mobile &amp; web</strong> dengan
+                Flutter, JavaScript, dan TypeScript, lalu memolesnya dengan
+                desain UI/UX dari prototipe Figma hingga antarmuka yang hidup.
+              </p>
+              <p>
+                Saat ini aku sedang asyik menjelajah
+                <strong>integrasi AI</strong> dan rekayasa komputasional dengan
+                Python — dari prediksi stok berbasis LSTM sampai algoritma
+                genetika. Motoku:
+                <em>"Debug your past, compile your future."</em> ✦
+              </p>
+
+              <div class="about-stats">
+                <div class="stat">
+                  <span class="stat-number" data-target="3">0</span
+                  ><span class="stat-plus">+</span>
+                  <p>Tahun Ngoding</p>
+                </div>
+                <div class="stat">
+                  <span class="stat-number" data-target="15">0</span
+                  ><span class="stat-plus">+</span>
+                  <p>Proyek Selesai</p>
+                </div>
+                <div class="stat">
+                  <span class="stat-number" data-target="12">0</span
+                  ><span class="stat-plus">+</span>
+                  <p>Teknologi Dikuasai</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Keahlian ===== -->
+      <section class="section" id="keahlian">
+        <div class="container">
+          <p class="section-tag reveal">— 02. Bahan Bakar Roket</p>
+          <h2 class="section-title reveal">
+            Keahlian<span class="gradient-text">ku</span>
+          </h2>
+
+          <div class="skills-grid">
+            <div class="skill-card reveal">
+              <div class="skill-icon">📱</div>
+              <h3>Flutter &amp; Dart</h3>
+              <div class="skill-bar">
+                <div class="skill-progress" data-level="85"></div>
+              </div>
+              <span class="skill-percent">85%</span>
+            </div>
+            <div class="skill-card reveal delay-1">
+              <div class="skill-icon">🌐</div>
+              <h3>HTML, CSS &amp; JS/TS</h3>
+              <div class="skill-bar">
+                <div class="skill-progress" data-level="88"></div>
+              </div>
+              <span class="skill-percent">88%</span>
+            </div>
+            <div class="skill-card reveal delay-2">
+              <div class="skill-icon">🐍</div>
+              <h3>Python &amp; AI</h3>
+              <div class="skill-bar">
+                <div class="skill-progress" data-level="80"></div>
+              </div>
+              <span class="skill-percent">80%</span>
+            </div>
+            <div class="skill-card reveal delay-3">
+              <div class="skill-icon">☕</div>
+              <h3>Java</h3>
+              <div class="skill-bar">
+                <div class="skill-progress" data-level="75"></div>
+              </div>
+              <span class="skill-percent">75%</span>
+            </div>
+            <div class="skill-card reveal delay-4">
+              <div class="skill-icon">🎨</div>
+              <h3>UI/UX &amp; Figma</h3>
+              <div class="skill-bar">
+                <div class="skill-progress" data-level="85"></div>
+              </div>
+              <span class="skill-percent">85%</span>
+            </div>
+            <div class="skill-card reveal delay-5">
+              <div class="skill-icon">🔥</div>
+              <h3>Firebase &amp; MySQL</h3>
+              <div class="skill-bar">
+                <div class="skill-progress" data-level="75"></div>
+              </div>
+              <span class="skill-percent">75%</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Proyek ===== -->
+      <section class="section" id="proyek">
+        <div class="container">
+          <p class="section-tag reveal">— 03. Konstelasi Karya</p>
+          <h2 class="section-title reveal">
+            Proyek <span class="gradient-text">Pilihan</span>
+          </h2>
+
+          <div class="projects-grid">
+            <article class="project-card reveal">
+              <div class="project-thumb thumb-1"><span>🌿</span></div>
+              <div class="project-body">
+                <h3>Eco-Stock</h3>
+                <p>
+                  Inventori pintar untuk UMKM — stok selaras cuaca real-time,
+                  rekomendasi produk mendekati expired, dan prediksi penjualan
+                  AI (LSTM). Proyek PKM.
+                </p>
+                <div class="project-tags">
+                  <span>Flutter</span><span>Firebase</span
+                  ><span>AI · LSTM</span>
+                </div>
+                <div class="project-links">
+                  <a
+                    href="https://github.com/Emil-02"
+                    target="_blank"
+                    rel="noopener"
+                    >⌨ GitHub</a
+                  >
+                </div>
+              </div>
+            </article>
+
+            <article class="project-card reveal delay-1">
+              <div class="project-thumb thumb-2"><span>📈</span></div>
+              <div class="project-body">
+                <h3>AI-SMC Trading System</h3>
+                <p>
+                  Analisis Smart Money Concepts (ICT) × AI untuk MetaTrader 5 —
+                  deteksi OB/FVG/BOS, skor confluence, sinyal real-time via
+                  Telegram.
+                </p>
+                <div class="project-tags">
+                  <span>Python</span><span>Gemini AI</span><span>MT5</span>
+                </div>
+                <div class="project-links">
+                  <a
+                    href="https://github.com/Emil-02"
+                    target="_blank"
+                    rel="noopener"
+                    >⌨ GitHub</a
+                  >
+                </div>
+              </div>
+            </article>
+
+            <article class="project-card reveal delay-2">
+              <div class="project-thumb thumb-3"><span>📖</span></div>
+              <div class="project-body">
+                <h3>Chat Story</h3>
+                <p>
+                  Cerita interaktif bergaya chat ditenagai LLM — karakter AI
+                  dengan long-term memory, simulasi mengetik, dan desain "Sakura
+                  Whisper".
+                </p>
+                <div class="project-tags">
+                  <span>Flutter</span><span>Node.js</span><span>LLM</span>
+                </div>
+                <div class="project-links">
+                  <a
+                    href="https://github.com/Emil-02"
+                    target="_blank"
+                    rel="noopener"
+                    >⌨ GitHub</a
+                  >
+                </div>
+              </div>
+            </article>
+
+            <article class="project-card reveal">
+              <div class="project-thumb thumb-4"><span>🪟</span></div>
+              <div class="project-body">
+                <h3>Gorden POS — Emil Gorden</h3>
+                <p>
+                  Aplikasi kasir &amp; manajemen usaha gorden: katalog produk,
+                  transaksi, dan laporan — web &amp; Android dalam satu basis
+                  kode.
+                </p>
+                <div class="project-tags">
+                  <span>TypeScript</span><span>Capacitor</span
+                  ><span>Firebase</span>
+                </div>
+                <div class="project-links">
+                  <a
+                    href="https://github.com/Emil-02"
+                    target="_blank"
+                    rel="noopener"
+                    >⌨ GitHub</a
+                  >
+                </div>
+              </div>
+            </article>
+
+            <article class="project-card reveal delay-1">
+              <div class="project-thumb thumb-5"><span>🧬</span></div>
+              <div class="project-body">
+                <h3>Kamus Konjo — Genetic Algorithm</h3>
+                <p>
+                  Pencarian kata kamus bahasa daerah Bugis/Konjo dengan
+                  Algoritma Genetika — tugas Rekayasa Komputasional Informatika.
+                </p>
+                <div class="project-tags">
+                  <span>Python</span><span>Genetic Algorithm</span>
+                </div>
+                <div class="project-links">
+                  <a
+                    href="https://github.com/Emil-02/Rekayasa_Komputasional"
+                    target="_blank"
+                    rel="noopener"
+                    >⌨ Kode</a
+                  >
+                </div>
+              </div>
+            </article>
+
+            <article class="project-card reveal delay-2">
+              <div class="project-thumb thumb-6"><span>🌌</span></div>
+              <div class="project-body">
+                <h3>Portofolio Semesta</h3>
+                <p>
+                  Website yang sedang kamu jelajahi ini — starfield canvas,
+                  planet CSS, dan animasi scroll, murni tanpa framework.
+                </p>
+                <div class="project-tags">
+                  <span>HTML</span><span>CSS</span><span>JavaScript</span>
+                </div>
+                <div class="project-links">
+                  <a href="#beranda">🔗 Kamu sedang di sini 😉</a>
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <div class="projects-cta reveal">
+            <a
+              href="https://github.com/Emil-02"
+              target="_blank"
+              rel="noopener"
+              class="btn btn-outline"
+              >Jelajahi semua karyaku di GitHub 🔭</a
+            >
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Mini Game ===== -->
+      <section class="section" id="game">
+        <div class="container">
+          <p class="section-tag reveal">— 05. Zona Bermain</p>
+          <h2 class="section-title reveal">
+            Astro <span class="gradient-text">Dodge</span>
+          </h2>
+          <p class="section-desc reveal">
+            Istirahat sebentar dari scrolling! Kemudikan roket, hindari
+            asteroid, dan kumpulkan bintang. Berapa skor tertinggimu? 🕹️
+          </p>
+
+          <div class="game-layout">
+            <div class="game-wrap reveal">
+              <div class="game-hud">
+                <button
+                  class="game-help"
+                  id="game-help"
+                  aria-label="Peraturan game"
+                  title="Peraturan game"
+                >
+                  ?
+                </button>
+                <span>⭐ Skor: <strong id="game-score">0</strong></span>
+                <span>🚀 Pilot: <strong id="game-player">—</strong></span>
+                <span>🏆 Terbaik: <strong id="game-best">0</strong></span>
+              </div>
+              <div class="game-frame">
+                <canvas id="game-canvas" width="640" height="420"></canvas>
+                <div class="game-overlay" id="game-overlay">
+                  <h3 id="game-overlay-title">Astro Dodge 🚀</h3>
+                  <p id="game-overlay-text">
+                    ⬅️ ➡️ atau A / D untuk bergerak · di HP cukup geser jarimu
+                  </p>
+                  <div class="game-name-field">
+                    <input
+                      type="text"
+                      id="game-name"
+                      maxlength="14"
+                      placeholder="Ketik nama pilotmu..."
+                      autocomplete="off"
+                    />
+                  </div>
+                  <button class="btn btn-primary" id="game-start">
+                    Mulai 🚀
+                  </button>
+                </div>
+                <div class="game-rules hidden" id="game-rules">
+                  <div class="game-rules-card">
+                    <button
+                      class="rules-close"
+                      id="rules-close"
+                      aria-label="Tutup peraturan"
+                    >
+                      ✕
+                    </button>
+                    <h3>📜 Peraturan Astro Dodge</h3>
+
+                    <div class="rules-section">
+                      <h4>🕹️ Kontrol</h4>
+                      <p class="rules-text">
+                        Gerakkan roket dengan <strong>⬅️ ➡️</strong> atau
+                        <strong>A / D</strong> — di HP, cukup geser jarimu di
+                        layar.
+                      </p>
+                    </div>
+
+                    <div class="rules-section">
+                      <h4>☄️ Rintangan — menabrak = game over</h4>
+                      <div class="rules-chips">
+                        <span>☄️ Meteor</span>
+                        <span>🐞 Bug</span>
+                        <span>🚫 404 Error</span>
+                        <span>🖥️ Server Down</span>
+                        <span>💾 Memory Leak</span>
+                      </div>
+                    </div>
+
+                    <div class="rules-section">
+                      <h4>🎁 Power-up Tech Stack</h4>
+                      <ul class="rules-list">
+                        <li>
+                          <b>⭐</b>
+                          <span>Bintang bonus — <strong>+25 poin</strong></span>
+                        </li>
+                        <li>
+                          <b>⚡</b>
+                          <span
+                            ><strong>JavaScript</strong> — speed boost 6
+                            detik</span
+                          >
+                        </li>
+                        <li>
+                          <b>🛡️</b>
+                          <span
+                            ><strong>Shield</strong> — tahan satu benturan (maks
+                            2 lapis)</span
+                          >
+                        </li>
+                        <li>
+                          <b>🐍</b>
+                          <span
+                            ><strong>Python</strong> — slow-motion 5 detik</span
+                          >
+                        </li>
+                        <li>
+                          <b>🔥</b>
+                          <span
+                            ><strong>Firebase</strong> — ledakkan semua
+                            rintangan (+5 poin/rintangan)</span
+                          >
+                        </li>
+                      </ul>
+                    </div>
+
+                    <div class="rules-section">
+                      <h4>🎖️ Lencana Pilot</h4>
+                      <ul class="rules-list">
+                        <li>
+                          <b>🌌</b>
+                          <span
+                            ><strong>Master Galaksi</strong> — skor ≥
+                            1.000</span
+                          >
+                        </li>
+                        <li>
+                          <b>🌠</b>
+                          <span
+                            ><strong>Master Universe</strong> — skor ≥
+                            3.000</span
+                          >
+                        </li>
+                        <li>
+                          <b>🌀</b>
+                          <span
+                            ><strong>Master Multiverse</strong> — skor ≥
+                            5.000</span
+                          >
+                        </li>
+                        <li>
+                          <b>👑</b>
+                          <span><strong>Legend</strong> — skor ≥ 10.000</span>
+                        </li>
+                        <li>
+                          <b>🧹</b>
+                          <span
+                            ><strong>Pembersih Langit</strong> — hancurkan ≥ 7
+                            rintangan sekaligus dengan 🔥 Firebase Blast</span
+                          >
+                        </li>
+                      </ul>
+                    </div>
+
+                    <div class="rules-section">
+                      <h4>ℹ️ Perlu Diketahui</h4>
+                      <ul class="rules-list">
+                        <li>
+                          <b>⏱️</b>
+                          <span
+                            >Semakin lama bertahan, skor terus bertambah — dan
+                            rintangan makin cepat &amp; rapat.</span
+                          >
+                        </li>
+                        <li>
+                          <b>🏆</b>
+                          <span
+                            >Skor terbaikmu tercatat di
+                            <strong>papan peringkat</strong> — rebut podium
+                            🥇🥈🥉!</span
+                          >
+                        </li>
+                        <li>
+                          <b>⏸️</b>
+                          <span
+                            >Membuka peraturan saat bermain otomatis
+                            <strong>menjeda</strong> game.</span
+                          >
+                        </li>
+                      </ul>
+                    </div>
+
+                    <button class="btn btn-primary" id="rules-ok">
+                      Siap, mengerti! 👍
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <aside class="leaderboard reveal delay-2">
+              <h3 class="lb-title">🏆 Papan Peringkat</h3>
+              <p class="lb-subtitle">Semua pilot yang pernah mengangkasa</p>
+              <ol class="lb-top3" id="lb-top3"></ol>
+              <div class="lb-divider" id="lb-divider" hidden>
+                <span>⚔️ Para Penantang</span>
+              </div>
+              <ol class="lb-rest" id="lb-rest"></ol>
+              <p class="lb-empty" id="lb-empty">
+                Belum ada pilot yang tercatat.<br />Jadilah legenda pertama! 🚀
+              </p>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Kontak ===== -->
+      <section class="section" id="kontak">
+        <div class="container">
+          <p class="section-tag reveal">— 04. Kirim Sinyal</p>
+          <h2 class="section-title reveal">
+            Mari <span class="gradient-text">Terhubung</span>
+          </h2>
+          <p class="section-desc reveal">
+            Punya ide proyek atau sekadar ingin menyapa? Kirim sinyalmu — aku
+            akan menangkapnya secepat cahaya. 📡
+          </p>
+
+          <div class="contact-grid">
+            <form class="contact-form reveal" id="contact-form">
+              <div class="form-group">
+                <input type="text" id="nama" required placeholder=" " />
+                <label for="nama">Nama Kamu</label>
+              </div>
+              <div class="form-group">
+                <input type="email" id="email" required placeholder=" " />
+                <label for="email">Email Kamu</label>
+              </div>
+              <div class="form-group">
+                <textarea
+                  id="pesan"
+                  rows="5"
+                  required
+                  placeholder=" "
+                ></textarea>
+                <label for="pesan">Pesan Kamu</label>
+              </div>
+              <button type="submit" class="btn btn-primary btn-full">
+                Luncurkan Pesan 🚀
+              </button>
+              <p class="form-status" id="form-status"></p>
+            </form>
+
+            <div class="contact-info reveal delay-2">
+              <div class="info-card">
+                <span class="info-icon">�</span>
+                <div>
+                  <h4>GitHub</h4>
+                  <a
+                    href="https://github.com/Emil-02"
+                    target="_blank"
+                    rel="noopener"
+                    >github.com/Emil-02</a
+                  >
+                </div>
+              </div>
+              <div class="info-card">
+                <span class="info-icon">📍</span>
+                <div>
+                  <h4>Lokasi</h4>
+                  <p>Makassar, Indonesia 🌏</p>
+                </div>
+              </div>
+              <div class="info-card">
+                <span class="info-icon">🎓</span>
+                <div>
+                  <h4>Status</h4>
+                  <p>Mahasiswa Informatika · terbuka untuk kolaborasi</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ===== Footer ===== -->
+    <footer class="footer">
+      <div class="container">
+        <p class="footer-logo">✦ Amboyy</p>
+        <p>
+          Debug your past, compile your future — dibuat dengan 💜 di antara
+          bintang-bintang.
+        </p>
+        <p class="footer-copy">
+          © <span id="year"></span> Amboyy (Emil-02). Semua hak dilindungi
+          semesta.
+        </p>
+      </div>
+    </footer>
+
+    <button class="back-to-top" id="back-to-top" aria-label="Kembali ke atas">
+      🚀
+    </button>
+
+    <script src="js/script.js"></script>
+  </body>
+</html>
