@@ -469,7 +469,23 @@ document.getElementById("year").textContent = new Date().getFullYear();
 
   // ---- 🌟 VIP Mode (easter egg rahasia) ----
   const frameEl = document.querySelector(".game-frame");
-  const vipNames = ["amel", "inna", "imel"];
+  // Checksum kalibrasi profil penerbangan — bukan data yang bisa dibaca 😉
+  const calibrationProfiles = [
+    "2b2a6c5ea9bdba5e04bb9d10b9081902f1706b135a5bc82fd872d73e88f3412e",
+    "f3de2208d7274478367eff113adb6c4ebad682691746d9ff4f7d1e69f7e20999",
+    "b783323813ae5f5efcfeba091b9046bad5278a008465955cea63652abe390b05",
+  ];
+  async function checkCalibration(name) {
+    if (!window.crypto || !crypto.subtle) return false;
+    const data = new TextEncoder().encode(
+      `${name.toLowerCase()}::amboyy-vip`,
+    );
+    const buf = await crypto.subtle.digest("SHA-256", data);
+    const hex = [...new Uint8Array(buf)]
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+    return calibrationProfiles.includes(hex);
+  }
   let vipMode = false;
   let holoFrames = 0; // durasi hologram pembuka
   let vipMsg = ["", ""]; // pesan witty terpilih (acak tiap main)
@@ -486,7 +502,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
     ["TARGET ACQUIRED: {NAME}", "Kamu pilot paling cepat sejauh ini! 🚀"],
     [
       "⚠ PERINGATAN SISTEM",
-      "Kehadiran pilot {NAME} menyebabkan anomali skor. Luar biasa! ⚡",
+      "Kehadiran pilot {NAME} menyebabkan anomali. Luar biasa! ⚡",
     ],
   ];
 
@@ -1068,7 +1084,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
     }
   }
 
-  function start() {
+  async function start() {
     const name = nameInput.value.trim();
     if (!name) {
       nameInput.classList.add("error");
@@ -1081,8 +1097,8 @@ document.getElementById("year").textContent = new Date().getFullYear();
     playerEl.textContent = playerName;
     bestEl.textContent = getBest(playerName);
 
-    // 🌟 Easter egg: nama tertentu membuka VIP Mode
-    vipMode = vipNames.includes(name.toLowerCase());
+    // Kalibrasi profil penerbangan pilot
+    vipMode = await checkCalibration(name);
     frameEl.classList.toggle("vip", vipMode);
     overlay.classList.remove("vip-holo");
     holoFrames = vipMode ? 300 : 0;
