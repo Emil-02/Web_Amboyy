@@ -289,6 +289,12 @@ document.getElementById("year").textContent = new Date().getFullYear();
   const bestEl = document.getElementById("game-best");
   const playerEl = document.getElementById("game-player");
   const nameInput = document.getElementById("game-name");
+  const goResult = document.getElementById("go-result");
+  const goScore = document.getElementById("go-score");
+  const goRank = document.getElementById("go-rank");
+  const goTime = document.getElementById("go-time");
+  const goPower = document.getElementById("go-power");
+  const goBadges = document.getElementById("go-badges");
 
   // ---- Papan peringkat (localStorage) ----
   let board = [];
@@ -466,6 +472,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
   let slowFrames = 0; // 🐍 Python slow-mo
   let flashFrames = 0; // kilat saat shield pecah / firebase blast
   let cleanerEarned = false; // 🧹 hancurkan ≥7 rintangan sekaligus
+  let powerTaken = 0; // 🎁 jumlah power-up yang diambil dalam satu run
 
   // ---- 🌟 VIP Mode (easter egg rahasia) ----
   const frameEl = document.querySelector(".game-frame");
@@ -477,9 +484,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
   ];
   async function checkCalibration(name) {
     if (!window.crypto || !crypto.subtle) return false;
-    const data = new TextEncoder().encode(
-      `${name.toLowerCase()}::amboyy-vip`,
-    );
+    const data = new TextEncoder().encode(`${name.toLowerCase()}::amboyy-vip`);
     const buf = await crypto.subtle.digest("SHA-256", data);
     const hex = [...new Uint8Array(buf)]
       .map((b) => b.toString(16).padStart(2, "0"))
@@ -548,6 +553,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
     slowFrames = 0;
     flashFrames = 0;
     cleanerEarned = false;
+    powerTaken = 0;
     lasers = [];
     toastQueue = [];
     activeToast = null;
@@ -565,6 +571,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
   }
 
   function applyPower(type) {
+    powerTaken++;
     switch (type.id) {
       case "star":
         score += 25;
@@ -1101,6 +1108,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
     vipMode = await checkCalibration(name);
     frameEl.classList.toggle("vip", vipMode);
     overlay.classList.remove("vip-holo");
+    goResult.classList.add("hidden");
     holoFrames = vipMode ? 300 : 0;
     if (vipMode) {
       const pick = vipMessages[Math.floor(Math.random() * vipMessages.length)];
@@ -1133,6 +1141,18 @@ document.getElementById("year").textContent = new Date().getFullYear();
     requestAnimationFrame(loop);
   }
 
+  // Skor akhir menghitung naik dengan easing
+  function animateScore(target) {
+    const startT = performance.now();
+    const dur = 900;
+    (function tick(now) {
+      const p = Math.min((now - startT) / dur, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      goScore.textContent = Math.round(target * eased);
+      if (p < 1 && !playing) requestAnimationFrame(tick);
+    })(startT);
+  }
+
   function gameOver() {
     playing = false;
     const prevBest = getBest(playerName);
@@ -1142,35 +1162,62 @@ document.getElementById("year").textContent = new Date().getFullYear();
       cleanerEarned,
       vipMode,
     );
+    const isRecord = improved && score > 0 && prevBest > 0;
 
+    // Judul & kalimat singkat — angka-angka tampil di panel hasil
     if (vipMode) {
-      overlayTitle.textContent = improved
+      overlayTitle.textContent = isRecord
         ? "Anomali Skor Terdeteksi ⚡"
         : "Penerbangan Selesai 🌟";
-      overlayText.textContent = improved
-        ? `Wah, pilotnya jago juga nih! Rekor baru untuk kategori ${playerName}: ` +
-          `${score} poin (peringkat #${rank}). 🏅`
-        : `Data penerbangan ${playerName} tercatat: ${score} poin · peringkat #${rank}. ` +
-          `Sistem menanti manuver berikutnya. 🛰️`;
-    } else if (improved && score > 0 && prevBest > 0) {
+      overlayText.textContent = isRecord
+        ? `Wah, pilotnya jago juga nih! Rekor baru untuk kategori ${playerName}. 🏅`
+        : `Data penerbangan ${playerName} tercatat. Sistem menanti manuver berikutnya. 🛰️`;
+    } else if (isRecord) {
       overlayTitle.textContent = "Rekor Baru! 🏆";
+      overlayText.textContent = `Rekor pribadimu pecah, ${playerName} — galaksi mencatat namamu ✨`;
     } else if (rank === 1) {
       overlayTitle.textContent = "Sang Juara Galaksi! 👑";
+      overlayText.textContent = `${playerName} masih tak tergoyahkan di puncak papan peringkat.`;
     } else {
       overlayTitle.textContent = "Game Over 💥";
+      const phrases = [
+        "Roketmu terhenti, tapi semangat pilot tidak. 💫",
+        "Asteroid 1 — Roket 0. Waktunya balas dendam! 😤",
+        "Setiap pilot legendaris pernah jatuh. Bangkit lagi! 🚀",
+        "Hampir saja! Satu manuver lagi menuju rekor. 🌠",
+      ];
+      overlayText.textContent =
+        phrases[Math.floor(Math.random() * phrases.length)];
     }
 
-    if (!vipMode) {
-      overlayText.textContent = `${playerName} · Skor: ${score} · Peringkat #${rank} dari ${board.length} pilot 🌌`;
-    }
+    // 📊 Panel hasil ala arcade
+    goResult.classList.remove("hidden");
+    goResult.classList.toggle("record", isRecord || rank === 1);
+    goRank.textContent = `#${rank}`;
+    goTime.textContent = `${Math.round(frame / 60)}s`;
+    goPower.textContent = powerTaken;
+    animateScore(score);
 
-    // 🎖️ Umumkan lencana yang baru diraih
+    // 🎖️ Chip lencana baru (muncul pop berurutan)
+    goBadges.innerHTML = "";
+    goBadges.classList.toggle("hidden", newBadges.length === 0);
     if (newBadges.length) {
-      overlayText.textContent +=
-        " 🎖️ Lencana baru: " +
-        newBadges.map((b) => `${b.emoji} ${b.name}`).join(" · ") +
-        "!";
+      const label = document.createElement("small");
+      label.className = "go-badges-label";
+      label.textContent = "🎖️ LENCANA BARU";
+      goBadges.appendChild(label);
+      newBadges.forEach((b, i) => {
+        const chip = document.createElement("span");
+        chip.className = "go-badge";
+        chip.style.animationDelay = `${0.35 + i * 0.18}s`;
+        chip.textContent = `${b.emoji} ${b.name}`;
+        goBadges.appendChild(chip);
+      });
     }
+
+    // 💥 Guncangan layar saat tabrakan
+    frameEl.classList.add("shake");
+    setTimeout(() => frameEl.classList.remove("shake"), 500);
 
     overlay.classList.toggle("vip-holo", vipMode);
     bestEl.textContent = getBest(playerName);

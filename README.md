@@ -18,12 +18,14 @@
 ## ✨ Fitur
 
 ### 🪐 Website
+
 - **Starfield canvas** — ratusan bintang berkelip dengan parallax mengikuti kursor + shooting star
 - **Planet CSS murni** dengan cincin berputar, bulan yang mengorbit, dan astronot melayang
 - Nebula glow beranimasi, efek ketik di hero, reveal saat scroll, skill bar & counter animasi
 - Responsif penuh — desktop, tablet, dan HP (menu hamburger)
 
 ### 🕹️ Mini Game: Astro Dodge
+
 - Kemudikan roket, hindari **meteor & masalah developer** (🐞 Bug, 🚫 404 Error, 🖥️ Server Down, 💾 Memory Leak)
 - **Power-up tech stack**: ⚡ JavaScript speed boost · 🛡️ Shield · 🐍 Python slow-motion · 🔥 Firebase Blast
 - **Papan peringkat** tanpa batas dengan podium 🥇🥈🥉 (tersimpan di `localStorage`)
@@ -55,4 +57,4 @@ Web_Portofolio/
 
 Dibuat oleh **Amboyy** ([@Emil-02](https://github.com/Emil-02)) — mahasiswa Informatika Unismuh Makassar.
 
-> ✦ *Debug your past, compile your future.* ✦
+> ✦ _Debug your past, compile your future._ ✦
