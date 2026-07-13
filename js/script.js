@@ -257,16 +257,52 @@ if (heroVisual && window.matchMedia("(pointer: fine)").matches) {
   });
 }
 
-// ===== 9. Form kontak (demo — belum terhubung backend) =====
+// ===== 9. Form kontak (Formspree) =====
+// ⚙️ AKTIFKAN: daftar gratis di https://formspree.io → New Form →
+// salin 8 karakter setelah "formspree.io/f/" ke variabel di bawah.
+// Selama kosong, form berjalan dalam mode demo.
+const FORMSPREE_CODE = ""; // contoh: "xayzabcd"
+
 const form = document.getElementById("contact-form");
 const formStatus = document.getElementById("form-status");
 
-form.addEventListener("submit", (e) => {
+form.addEventListener("submit", async (e) => {
   e.preventDefault();
-  formStatus.textContent =
-    "🛰️ Sinyal terkirim! Aku akan segera membalas pesanmu.";
-  form.reset();
-  setTimeout(() => (formStatus.textContent = ""), 5000);
+
+  // Mode demo bila belum terhubung Formspree
+  if (!FORMSPREE_CODE) {
+    formStatus.textContent =
+      "🛰️ Sinyal terkirim! Aku akan segera membalas pesanmu.";
+    form.reset();
+    setTimeout(() => (formStatus.textContent = ""), 5000);
+    return;
+  }
+
+  const tombol = form.querySelector("button[type=submit]");
+  tombol.disabled = true;
+  formStatus.textContent = "📡 Mengirim sinyal...";
+
+  try {
+    const res = await fetch(`https://formspree.io/f/${FORMSPREE_CODE}`, {
+      method: "POST",
+      body: new FormData(form),
+      headers: { Accept: "application/json" },
+    });
+    if (res.ok) {
+      formStatus.textContent =
+        "🛰️ Sinyal diterima! Aku akan segera membalas pesanmu.";
+      form.reset();
+    } else {
+      formStatus.textContent =
+        "☄️ Sinyal terganggu — coba lagi sebentar lagi, ya.";
+    }
+  } catch {
+    formStatus.textContent =
+      "☄️ Tidak ada koneksi — periksa internetmu lalu coba lagi.";
+  } finally {
+    tombol.disabled = false;
+    setTimeout(() => (formStatus.textContent = ""), 6000);
+  }
 });
 
 // ===== 10. Tahun otomatis di footer =====
@@ -1048,7 +1084,6 @@ document.getElementById("year").textContent = new Date().getFullYear();
       g.strokeStyle = "rgba(52, 211, 153, 0.6)";
       g.lineWidth = 1.2;
       g.stroke();
-
       // lampu siaran berkedip
       g.fillStyle =
         Math.floor(frame / 20) % 2
@@ -1057,13 +1092,11 @@ document.getElementById("year").textContent = new Date().getFullYear();
       g.beginPath();
       g.arc(bx + 15, by + 15, 4, 0, Math.PI * 2);
       g.fill();
-
       g.textAlign = "left";
       g.textBaseline = "top";
       g.fillStyle = "#a7f3d0";
       g.font = "700 10px 'Orbitron', monospace";
       g.fillText("PUSAT KONTROL MISI — TRANSMISI AUDIO", bx + 27, by + 10);
-
       // pesan dengan efek ketik radio + bungkus baris
       const msg =
         `"Anomali terdeteksi! Manuver Pilot ${playerName} di atas ` +
