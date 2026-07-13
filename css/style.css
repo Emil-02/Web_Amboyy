@@ -26,17 +26,14 @@
   --radius: 16px;
   --shadow-glow: 0 0 40px rgba(139, 92, 246, 0.25);
 }
-
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
-
 html {
   scroll-behavior: smooth;
 }
-
 body {
   background: var(--bg);
   color: var(--text);
@@ -1626,6 +1623,48 @@ body {
 .game-overlay.vip-holo p {
   color: #d1fae5;
   text-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+}
+
+/* 💀 Chaos Mode — protokol rival */
+.game-frame.chaos {
+  border-color: rgba(239, 68, 68, 0.55);
+  background: radial-gradient(
+    ellipse at 50% 0%,
+    rgba(239, 68, 68, 0.12),
+    rgba(26, 6, 10, 0.94) 65%
+  );
+  box-shadow: 0 0 42px rgba(239, 68, 68, 0.28);
+}
+.game-overlay.chaos-holo {
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.035) 0 1px,
+      transparent 1px 5px
+    ),
+    rgba(26, 6, 10, 0.9);
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  box-shadow: inset 0 0 70px rgba(239, 68, 68, 0.16);
+}
+.game-overlay.chaos-holo h3 {
+  font-family: var(--font-logo);
+  font-size: 1.15rem;
+  letter-spacing: 1.5px;
+  color: #fca5a5;
+  text-shadow: 0 0 16px rgba(239, 68, 68, 0.85);
+}
+.game-overlay.chaos-holo p {
+  color: #fee2e2;
+}
+
+/* Label troll di papan peringkat */
+.lb-troll {
+  display: block;
+  white-space: normal;
+  font-size: 0.62rem;
+  line-height: 1.25;
+  color: var(--text-muted);
+  margin-top: 2px;
 }
 
 .game-name-field input {

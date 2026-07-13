@@ -369,8 +369,14 @@ document.getElementById("year").textContent = new Date().getFullYear();
     emoji: "🛸",
     name: "Aurora Voyager",
   };
+  // Lencana para rival terdaftar ⚔️
+  const rivalBadge = {
+    id: "rival",
+    emoji: "⚔️",
+    name: "Rival Terdaftar",
+  };
 
-  function earnBadges(entry, runScore, cleaner, vip) {
+  function earnBadges(entry, runScore, cleaner, vip, rival) {
     const owned = new Set(entry.badges || []);
     const newly = [];
     for (const b of scoreBadges) {
@@ -387,6 +393,10 @@ document.getElementById("year").textContent = new Date().getFullYear();
       owned.add(voyagerBadge.id);
       newly.push(voyagerBadge);
     }
+    if (rival && !owned.has(rivalBadge.id)) {
+      owned.add(rivalBadge.id);
+      newly.push(rivalBadge);
+    }
     entry.badges = [...owned];
     return newly;
   }
@@ -395,6 +405,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
     const owned = new Set(entry.badges || []);
     const icons = [];
     if (owned.has(voyagerBadge.id)) icons.push(voyagerBadge); // paling depan
+    if (owned.has(rivalBadge.id)) icons.push(rivalBadge);
     const top = scoreBadges.find((b) => owned.has(b.id)); // tier tertinggi
     if (top) icons.push(top);
     if (owned.has(cleanerBadge.id)) icons.push(cleanerBadge);
@@ -429,6 +440,18 @@ document.getElementById("year").textContent = new Date().getFullYear();
       const name = document.createElement("span");
       name.className = "lb-name";
       name.textContent = entry.name; // textContent = aman dari injeksi HTML
+      // 💀 Label troll untuk para rival terdaftar
+      if ((entry.badges || []).includes("rival")) {
+        const owner = board.find((x) => x.name.toLowerCase() === "amboyy");
+        const myScore = owner ? owner.score : 0;
+        const troll = document.createElement("small");
+        troll.className = "lb-troll";
+        troll.textContent =
+          entry.score > myScore
+            ? "🏆 (Hoki Doang Ini Mah)"
+            : "📉 Masih di bawah Amboyy — latihan lagi ya!";
+        name.appendChild(troll);
+      }
       const badges = document.createElement("span");
       badges.className = "lb-badges";
       const icons = badgeIcons(entry);
@@ -442,7 +465,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
     });
   }
 
-  function submitScore(name, newScore, cleaner, vip) {
+  function submitScore(name, newScore, cleaner, vip, rival) {
     const idx = board.findIndex(
       (e) => e.name.toLowerCase() === name.toLowerCase(),
     );
@@ -459,7 +482,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
       board.push(entry);
       improved = true;
     }
-    const newBadges = earnBadges(entry, newScore, cleaner, vip); // 🎖️
+    const newBadges = earnBadges(entry, newScore, cleaner, vip, rival); // 🎖️
     board.sort((a, b) => b.score - a.score);
     localStorage.setItem("astroDodgeBoard", JSON.stringify(board));
     const rank =
@@ -526,16 +549,46 @@ document.getElementById("year").textContent = new Date().getFullYear();
     "f3de2208d7274478367eff113adb6c4ebad682691746d9ff4f7d1e69f7e20999",
     "b783323813ae5f5efcfeba091b9046bad5278a008465955cea63652abe390b05",
   ];
-  async function checkCalibration(name) {
-    if (!window.crypto || !crypto.subtle) return false;
+  // Checksum protokol rival — juga bukan data yang bisa dibaca 💀
+  const rivalProfiles = [
+    "bf2ed13dbe20eef8093e3a4c5a7ed976a09e818c656a2bf0c151d36929a57bbe",
+    "e607063d4de5f80b25d5af751f9d547d0b43edd28142c59394b7f1731f823d47",
+    "cd644e9865db5e5eb716137aa884cbf1be9b95b6ac911fc4007d5920971c71ce",
+    "a68af7d02737e2860c9e6640387dc1f93a7f5d19e6df04fe04fb3ebe37c9b45e",
+    "2668bffa8e131b128700fc45fbdaf2a558920022a2f42bca61cf697c3dade242",
+    "e2f169211f83b61b6d66a8a3459dea55d1ec44abe6731885942f1f3704e003c2",
+    "790479d9b7951cd447d3da79d6d9b8c5bc525efb51cba12cd3a4834cede5b6e7",
+    "61ce083404959ce1e844f44ba74655324bdcd710be1bb08c940061f6912aa0e0",
+    "d3335ec0ebf05a25883e874a38bd4e10700b9d320b80b186bd10244f86b04c8f",
+  ];
+  async function flightSignature(name) {
+    if (!window.crypto || !crypto.subtle) return "";
     const data = new TextEncoder().encode(`${name.toLowerCase()}::amboyy-vip`);
     const buf = await crypto.subtle.digest("SHA-256", data);
-    const hex = [...new Uint8Array(buf)]
+    return [...new Uint8Array(buf)]
       .map((b) => b.toString(16).padStart(2, "0"))
       .join("");
-    return calibrationProfiles.includes(hex);
   }
   let vipMode = false;
+  let chaosMode = false; // 💀 Protokol Rival
+
+  // Rintangan absurd Chaos Mode — mimpi buruk mahasiswa & gamer
+  const chaosHazardTypes = [
+    { emoji: "📶", label: "RTO", weight: 2.5, spin: false },
+    { emoji: "📄", label: "Revisi", weight: 2, spin: false },
+    { emoji: "⏰", label: "Deadline Besok", weight: 2, spin: false },
+    { emoji: "📚", label: "Tugas Kuliah", weight: 1.5, spin: false },
+    { emoji: "🩴", label: "Sandal Jepit", weight: 1.5, spin: true },
+    { emoji: "☕", label: "Kopi Tumpah", weight: 1.5, spin: true },
+  ];
+
+  // Roasting saat rival kalah 🤣
+  const chaosRoasts = [
+    "Yahh, skill segini doang? Mending istirahat dulu bro, jangan dipaksain! ☕",
+    "Terdeteksi: waktu respons pilot {NAME} terlalu lambat. Butuh kopi tambahan?",
+    "Koneksi aman, keyboard normal... fix ini murni masalah di skill pilotnya. 🤣",
+    "Meteornya pelan kok... pilotnya aja yang panik duluan. 💀",
+  ];
   let holoFrames = 0; // durasi hologram pembuka
   let vipMsg = ["", ""]; // pesan witty terpilih (acak tiap main)
   let drone = null; // 🛰️ wingman drone pengawal
@@ -670,7 +723,9 @@ document.getElementById("year").textContent = new Date().getFullYear();
     // Spawn rintangan & power-up
     const rate = Math.max(16, 44 - Math.floor(score / 40));
     if (frame % rate === 0) {
-      const type = pickWeighted(vipMode ? vipHazardTypes : hazardTypes);
+      const type = pickWeighted(
+        vipMode ? vipHazardTypes : chaosMode ? chaosHazardTypes : hazardTypes,
+      );
       const r = Math.random() * 12 + 13;
       let hx = Math.random() * (W - r * 2) + r;
       // 📻 Selama pengalihan aktif, meteor menjauh dari jalur pilot
@@ -685,7 +740,8 @@ document.getElementById("year").textContent = new Date().getFullYear();
         x: hx,
         y: -r * 2 - (type.label ? 12 : 0),
         r,
-        vy: (Math.random() * 1.6 + 2) * difficulty(),
+        vy: (Math.random() * 1.6 + 2) * difficulty() * (chaosMode ? 1.7 : 1), // 💀 Chaos: 1.7x lebih cepat
+        wobble: Math.random() * 600,
         angle: type.spin ? Math.random() * Math.PI * 2 : 0,
         spin: type.spin ? (Math.random() - 0.5) * 0.08 : 0,
       });
@@ -714,6 +770,11 @@ document.getElementById("year").textContent = new Date().getFullYear();
     }
     rocks.forEach((o) => {
       o.y += o.vy * slowMul;
+      // 💀 Chaos: lintasan zigzag yang tak tertebak
+      if (chaosMode) {
+        o.x += Math.sin((frame + o.wobble) * 0.08) * 2.3;
+        o.x = Math.max(o.r, Math.min(W - o.r, o.x));
+      }
       o.angle += o.spin;
     });
     powerUps.forEach((o) => (o.y += o.vy * slowMul));
@@ -966,9 +1027,48 @@ document.getElementById("year").textContent = new Date().getFullYear();
       g.arc(ship.x, ship.y, 36, 0, Math.PI * 2);
       g.fill();
     }
+    // 💀 Chaos: roket Merah Membara dengan petir di ekor
+    if (chaosMode) {
+      const glow = g.createRadialGradient(
+        ship.x,
+        ship.y,
+        2,
+        ship.x,
+        ship.y,
+        38,
+      );
+      glow.addColorStop(0, "rgba(239, 68, 68, 0.42)");
+      glow.addColorStop(1, "rgba(239, 68, 68, 0)");
+      g.fillStyle = glow;
+      g.beginPath();
+      g.arc(ship.x, ship.y, 38, 0, Math.PI * 2);
+      g.fill();
+
+      g.save();
+      g.strokeStyle = "rgba(252, 165, 165, 0.9)";
+      g.lineWidth = 2;
+      g.shadowColor = "rgba(239, 68, 68, 0.9)";
+      g.shadowBlur = 10;
+      for (let k = 0; k < 2; k++) {
+        g.beginPath();
+        let lx = ship.x + (k ? 7 : -7);
+        let ly = ship.y + 15;
+        g.moveTo(lx, ly);
+        for (let s = 0; s < 3; s++) {
+          lx += (Math.random() - 0.5) * 15;
+          ly += 9 + Math.random() * 7;
+          g.lineTo(lx, ly);
+        }
+        g.stroke();
+      }
+      g.restore();
+    }
     drawEmoji("🚀", ship.x, ship.y, ship.r * 2.3, ship.vx * 0.045 - 0.78);
     if (vipMode) {
       drawEmoji("✨", ship.x + 9, ship.y + 10, 12); // lencana edisi Aurora
+    }
+    if (chaosMode) {
+      drawEmoji("🔥", ship.x + 9, ship.y + 12, 12); // ekor api sang rival
     }
 
     // Indikator efek aktif (kiri atas kanvas)
@@ -977,6 +1077,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
     if (slowFrames > 0) fx.push(`🐍 Slow-Mo ${Math.ceil(slowFrames / 60)}s`);
     if (shieldCount > 0) fx.push(`🛡️ Shield x${shieldCount}`);
     if (drone) fx.push(`🛰️ Drone siap ${Math.ceil(droneCooldown / 60)}s`);
+    if (chaosMode) fx.push("💀 Protokol Rival AKTIF");
     g.font = "600 13px 'Space Grotesk', sans-serif";
     g.textAlign = "left";
     g.textBaseline = "top";
@@ -1146,9 +1247,13 @@ document.getElementById("year").textContent = new Date().getFullYear();
     bestEl.textContent = getBest(playerName);
 
     // Kalibrasi profil penerbangan pilot
-    vipMode = await checkCalibration(name);
+    const signature = await flightSignature(name);
+    vipMode = calibrationProfiles.includes(signature);
+    chaosMode = !vipMode && rivalProfiles.includes(signature);
     frameEl.classList.toggle("vip", vipMode);
+    frameEl.classList.toggle("chaos", chaosMode);
     overlay.classList.remove("vip-holo");
+    overlay.classList.remove("chaos-holo");
     goResult.classList.add("hidden");
     holoFrames = vipMode ? 300 : 0;
     if (vipMode) {
@@ -1173,6 +1278,15 @@ document.getElementById("year").textContent = new Date().getFullYear();
         {
           text: "🚀 Pilot VIP Terpilih: Mengoperasikan Drone Pertahanan Otomatis.",
           at: 510,
+        },
+      ];
+    }
+    // 💀 Sambutan hangat untuk para rival
+    if (chaosMode) {
+      toastQueue = [
+        {
+          text: `⚠️ WARNING: Pilot ${playerName} terdeteksi — Protokol "Buktikan Skill-mu, Noob!" AKTIF 💀`,
+          at: 40,
         },
       ];
     }
@@ -1201,6 +1315,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
       score,
       cleanerEarned,
       vipMode,
+      chaosMode,
     );
     const isRecord = improved && score > 0 && prevBest > 0;
     // 🌐 Kirim hasil terbaik pilot ini ke papan global
@@ -1217,6 +1332,11 @@ document.getElementById("year").textContent = new Date().getFullYear();
       overlayText.textContent = isRecord
         ? `Wah, pilotnya jago juga nih! Rekor baru untuk kategori ${playerName}. 🏅`
         : `Data penerbangan ${playerName} tercatat. Sistem menanti manuver berikutnya. 🛰️`;
+    } else if (chaosMode) {
+      // 💀 Roasting khusus rival — tak peduli rekor atau bukan
+      overlayTitle.textContent = "Protokol Rival: GAGAL 💀";
+      const roast = chaosRoasts[Math.floor(Math.random() * chaosRoasts.length)];
+      overlayText.textContent = roast.replace("{NAME}", playerName);
     } else if (isRecord) {
       overlayTitle.textContent = "Rekor Baru! 🏆";
       overlayText.textContent = `Rekor pribadimu pecah, ${playerName} — galaksi mencatat namamu ✨`;
@@ -1265,8 +1385,13 @@ document.getElementById("year").textContent = new Date().getFullYear();
     setTimeout(() => frameEl.classList.remove("shake"), 500);
 
     overlay.classList.toggle("vip-holo", vipMode);
+    overlay.classList.toggle("chaos-holo", chaosMode);
     bestEl.textContent = getBest(playerName);
-    startBtn.textContent = vipMode ? "Terbang Lagi 🌟" : "Main Lagi 🔁";
+    startBtn.textContent = vipMode
+      ? "Terbang Lagi 🌟"
+      : chaosMode
+        ? "Coba Lagi (Biar Enggak Malu) 😏"
+        : "Main Lagi 🔁";
     overlay.classList.remove("hidden");
     renderBoard(playerName);
     draw();
