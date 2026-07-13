@@ -9,7 +9,7 @@
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black)
 ![No Framework](https://img.shields.io/badge/Framework-Vanilla-8b5cf6?style=flat-square)
 
-🔗 **Live:** [emil-02.github.io/Web_Portofolio](https://emil-02.github.io/Web_Portofolio/)
+🔗 **Live:** [emil-02.github.io/Web_Amboyy](https://emil-02.github.io/Web_Amboyy/)
 
 </div>
 
@@ -38,18 +38,19 @@
 Tanpa build tool, tanpa dependency — cukup:
 
 ```bash
-git clone https://github.com/Emil-02/Web_Portofolio.git
-cd Web_Portofolio
+git clone https://github.com/Emil-02/Web_Amboyy.git
+cd Web_Amboyy
 # buka index.html langsung di browser, atau pakai Live Server
 ```
 
 ## 📁 Struktur
 
 ```
-Web_Portofolio/
+Web_Amboyy/
 ├── index.html        # Struktur halaman
 ├── css/style.css     # Tema dark universe + semua animasi
 ├── js/script.js      # Starfield, interaksi, dan logika game
+├── js/firebase.js    # Papan peringkat global (Firestore, sinkron live)
 └── img/              # Aset gambar
 ```
 
