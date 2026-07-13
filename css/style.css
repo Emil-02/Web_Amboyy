@@ -1555,6 +1555,48 @@ body {
   }
 }
 
+/* 📤 Tombol tantang teman */
+.go-share {
+  padding: 10px 24px;
+  font-size: 0.85rem;
+}
+
+/* 🚀 Pemilih skin roket */
+.skin-picker {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.skin-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1.5px solid var(--card-border);
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 1.15rem;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition:
+    transform 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+.skin-btn:hover {
+  transform: translateY(-3px) scale(1.08);
+}
+.skin-btn.selected {
+  border-color: var(--cyan);
+  box-shadow: 0 0 14px rgba(34, 211, 238, 0.45);
+  background: rgba(34, 211, 238, 0.12);
+}
+.skin-btn.locked {
+  opacity: 0.35;
+  cursor: not-allowed;
+  font-size: 0.9rem;
+}
+
 /* 💥 Guncangan saat tabrakan */
 .game-frame.shake {
   animation: frame-shake 0.45s ease;
@@ -1666,7 +1708,6 @@ body {
   color: var(--text-muted);
   margin-top: 2px;
 }
-
 .game-name-field input {
   width: min(280px, 80%);
   padding: 12px 18px;

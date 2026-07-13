@@ -495,6 +495,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
     board = e.detail;
     localStorage.setItem("astroDodgeBoard", JSON.stringify(board));
     renderBoard(playerName);
+    renderSkins(); // lencana dari cloud bisa membuka skin
     if (playerName) bestEl.textContent = getBest(playerName);
   });
 
@@ -540,6 +541,174 @@ document.getElementById("year").textContent = new Date().getFullYear();
   let flashFrames = 0; // kilat saat shield pecah / firebase blast
   let cleanerEarned = false; // 🧹 hancurkan ≥7 rintangan sekaligus
   let powerTaken = 0; // 🎁 jumlah power-up yang diambil dalam satu run
+  let particles = []; // 💥 pecahan ledakan
+  let boss = null; // 👾 Segmentation Fault
+  let bossesSpawned = 0; // berapa boss sudah muncul (tiap 1000 poin)
+  let combo = 0; // 🔥 near-miss beruntun
+  let comboTimer = 0;
+  let comboPops = []; // teks mengambang "NYARIS! +N"
+  let lastScore = 0; // untuk tombol share
+  let lastRank = 0;
+
+  // ---- 🔊 Suara retro (Web Audio API, tanpa file) ----
+  let audioCtx = null;
+  let muted = localStorage.getItem("astroMuted") === "1";
+
+  function tone(f1, f2, dur, type, vol) {
+    const t = audioCtx.currentTime;
+    const o = audioCtx.createOscillator();
+    const gn = audioCtx.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(f1, t);
+    o.frequency.exponentialRampToValueAtTime(Math.max(f2, 1), t + dur);
+    gn.gain.setValueAtTime(vol, t);
+    gn.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    o.connect(gn);
+    gn.connect(audioCtx.destination);
+    o.start(t);
+    o.stop(t + dur + 0.02);
+  }
+
+  function noiseBurst(dur, vol) {
+    const t = audioCtx.currentTime;
+    const len = Math.floor(audioCtx.sampleRate * dur);
+    const buf = audioCtx.createBuffer(1, len, audioCtx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) {
+      data[i] = (Math.random() * 2 - 1) * (1 - i / len);
+    }
+    const src = audioCtx.createBufferSource();
+    const gn = audioCtx.createGain();
+    src.buffer = buf;
+    gn.gain.setValueAtTime(vol, t);
+    src.connect(gn);
+    gn.connect(audioCtx.destination);
+    src.start(t);
+  }
+
+  function sfx(kind, opt = 0) {
+    if (muted) return;
+    try {
+      audioCtx =
+        audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === "suspended") audioCtx.resume();
+      switch (kind) {
+        case "laser":
+          tone(900, 160, 0.13, "square", 0.06);
+          break;
+        case "boom":
+          noiseBurst(0.28, 0.16);
+          tone(190, 45, 0.28, "sawtooth", 0.1);
+          break;
+        case "power":
+          tone(520, 1040, 0.14, "sine", 0.09);
+          setTimeout(() => !muted && tone(780, 1560, 0.12, "sine", 0.07), 70);
+          break;
+        case "hit":
+          noiseBurst(0.15, 0.12);
+          tone(300, 90, 0.2, "square", 0.08);
+          break;
+        case "over":
+          tone(400, 60, 0.7, "sawtooth", 0.1);
+          noiseBurst(0.5, 0.1);
+          break;
+        case "record":
+          [523, 659, 784, 1047].forEach((f, i) =>
+            setTimeout(
+              () => !muted && tone(f, f, 0.16, "triangle", 0.09),
+              i * 110,
+            ),
+          );
+          break;
+        case "combo":
+          tone(600 + opt * 90, 900 + opt * 120, 0.09, "triangle", 0.07);
+          break;
+        case "boss":
+          [220, 175, 220, 175].forEach((f, i) =>
+            setTimeout(
+              () => !muted && tone(f, f, 0.18, "square", 0.09),
+              i * 160,
+            ),
+          );
+          break;
+      }
+    } catch {
+      /* audio tak tersedia — abaikan */
+    }
+  }
+
+  // 💥 Pecahan partikel
+  function spawnParticles(x, y, color, n = 12, speed = 3.2) {
+    for (let i = 0; i < n; i++) {
+      const a = Math.random() * Math.PI * 2;
+      const v = Math.random() * speed + 0.8;
+      particles.push({
+        x,
+        y,
+        vx: Math.cos(a) * v,
+        vy: Math.sin(a) * v,
+        life: 26 + Math.random() * 16,
+        max: 42,
+        color,
+        r: Math.random() * 2.4 + 1,
+      });
+    }
+  }
+
+  // 🚀 Skin roket — terbuka lewat lencana pilot
+  const skins = [
+    { emoji: "🚀", need: null, label: "Roket Klasik" },
+    { emoji: "🛸", need: "galaksi", label: "UFO — butuh 🌌 Master Galaksi" },
+    {
+      emoji: "👾",
+      need: "universe",
+      label: "Invader — butuh 🌠 Master Universe",
+    },
+    {
+      emoji: "🐉",
+      need: "multiverse",
+      label: "Naga Kosmik — butuh 🌀 Master Multiverse",
+    },
+    { emoji: "🦄", need: "legend", label: "Unicorn — butuh 👑 Legend" },
+    {
+      emoji: "🧹",
+      need: "pembersih",
+      label: "Sapu Terbang — butuh 🧹 Pembersih Langit",
+    },
+  ];
+  let shipSkin = localStorage.getItem("astroSkin") || "🚀";
+
+  function unlockedBadges(name) {
+    const entry = board.find(
+      (e) => e.name.toLowerCase() === (name || "").toLowerCase(),
+    );
+    return new Set(entry ? entry.badges || [] : []);
+  }
+
+  function renderSkins() {
+    const holder = document.getElementById("skin-picker");
+    if (!holder) return;
+    const owned = unlockedBadges(nameInput.value.trim() || playerName);
+    holder.innerHTML = "";
+    skins.forEach((s) => {
+      const open = !s.need || owned.has(s.need);
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className =
+        "skin-btn" +
+        (shipSkin === s.emoji ? " selected" : "") +
+        (open ? "" : " locked");
+      b.textContent = open ? s.emoji : "🔒";
+      b.title = s.label;
+      b.addEventListener("click", () => {
+        if (!open) return;
+        shipSkin = s.emoji;
+        localStorage.setItem("astroSkin", shipSkin);
+        renderSkins();
+      });
+      holder.appendChild(b);
+    });
+  }
 
   // ---- 🌟 VIP Mode (easter egg rahasia) ----
   const frameEl = document.querySelector(".game-frame");
@@ -651,6 +820,12 @@ document.getElementById("year").textContent = new Date().getFullYear();
     flashFrames = 0;
     cleanerEarned = false;
     powerTaken = 0;
+    particles = [];
+    boss = null;
+    bossesSpawned = 0;
+    combo = 0;
+    comboTimer = 0;
+    comboPops = [];
     lasers = [];
     toastQueue = [];
     activeToast = null;
@@ -669,6 +844,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
 
   function applyPower(type) {
     powerTaken++;
+    sfx("power");
     switch (type.id) {
       case "star":
         score += 25;
@@ -685,8 +861,13 @@ document.getElementById("year").textContent = new Date().getFullYear();
       case "firebase": // 🔥 ledakkan semua rintangan (+5/rintangan)
         if (rocks.length >= 7) cleanerEarned = true; // 🧹 Pembersih Langit
         score += rocks.length * 5;
+        rocks.forEach((o) =>
+          spawnParticles(o.x, o.y, "rgba(255, 170, 60, 0.9)", 8, 2.6),
+        );
+        if (boss) boss.hp -= 3; // 🔥 blast melukai boss juga
         rocks = [];
         flashFrames = 14;
+        sfx("boom");
         break;
     }
   }
@@ -784,15 +965,42 @@ document.getElementById("year").textContent = new Date().getFullYear();
     // Tabrakan rintangan (🛡️ menyelamatkan satu benturan)
     for (let i = rocks.length - 1; i >= 0; i--) {
       const o = rocks[i];
-      if (Math.hypot(o.x - ship.x, o.y - ship.y) < o.r + ship.r - 6) {
+      const jarak = Math.hypot(o.x - ship.x, o.y - ship.y);
+      if (jarak < o.r + ship.r - 6) {
         if (shieldCount > 0) {
           shieldCount--;
+          spawnParticles(o.x, o.y, "rgba(34, 211, 238, 0.9)", 14, 3.5);
           rocks.splice(i, 1);
           flashFrames = 10;
+          combo = 0;
+          comboTimer = 0;
+          sfx("hit");
         } else {
+          spawnParticles(ship.x, ship.y, "rgba(239, 68, 68, 0.95)", 26, 4.5);
           return gameOver();
         }
+      } else if (!o.grazed && o.y > ship.y - 4 && jarak < o.r + ship.r + 30) {
+        // 🔥 NYARIS! Lewat sangat dekat tanpa menabrak
+        o.grazed = true;
+        combo++;
+        comboTimer = 240;
+        const bonus = 5 * combo;
+        score += bonus;
+        comboPops.push({
+          x: o.x,
+          y: o.y - o.r,
+          text:
+            combo > 1 ? `NYARIS! +${bonus} (x${combo})` : `NYARIS! +${bonus}`,
+          life: 55,
+        });
+        sfx("combo", Math.min(combo, 8));
+      } else if (!o.grazed && o.y > ship.y + 30) {
+        o.grazed = true; // sudah lewat, tak dihitung lagi
       }
+    }
+    if (comboTimer > 0) {
+      comboTimer--;
+      if (comboTimer === 0) combo = 0;
     }
 
     // Ambil power-up
@@ -810,31 +1018,112 @@ document.getElementById("year").textContent = new Date().getFullYear();
       drone.x = ship.x + Math.cos(drone.angle) * 38;
       drone.y = ship.y - 6 + Math.sin(drone.angle) * 22;
       if (droneCooldown > 0) droneCooldown--;
-      if (droneCooldown <= 0 && rocks.length) {
-        let ti = 0;
-        let td = Infinity;
-        rocks.forEach((o, i) => {
-          const d = Math.hypot(o.x - drone.x, o.y - drone.y);
-          if (d < td) {
-            td = d;
-            ti = i;
-          }
-        });
-        const target = rocks[ti];
-        lasers.push({
-          x1: drone.x,
-          y1: drone.y,
-          x2: target.x,
-          y2: target.y,
-          life: 14,
-        });
-        rocks.splice(ti, 1);
-        score += 3; // bonus hancurkan rintangan
+      if (droneCooldown <= 0 && (boss || rocks.length)) {
+        let tx;
+        let ty;
+        if (boss) {
+          // prioritaskan boss
+          boss.hp--;
+          tx = boss.x;
+          ty = boss.y;
+          spawnParticles(boss.x, boss.y, "rgba(167, 139, 250, 0.9)", 8, 2.5);
+        } else {
+          let ti = 0;
+          let td = Infinity;
+          rocks.forEach((o, i) => {
+            const d = Math.hypot(o.x - drone.x, o.y - drone.y);
+            if (d < td) {
+              td = d;
+              ti = i;
+            }
+          });
+          const target = rocks[ti];
+          tx = target.x;
+          ty = target.y;
+          spawnParticles(tx, ty, "rgba(52, 211, 153, 0.9)", 10, 3);
+          rocks.splice(ti, 1);
+          score += 3; // bonus hancurkan rintangan
+        }
+        lasers.push({ x1: drone.x, y1: drone.y, x2: tx, y2: ty, life: 14 });
+        sfx("laser");
         droneCooldown = 180 + Math.floor(Math.random() * 120); // 3–5 detik
       }
     }
     lasers.forEach((l) => l.life--);
     lasers = lasers.filter((l) => l.life > 0);
+
+    // 💥 Partikel & teks combo mengambang
+    particles.forEach((p) => {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.05;
+      p.life--;
+    });
+    particles = particles.filter((p) => p.life > 0);
+    comboPops.forEach((c) => {
+      c.y -= 0.7;
+      c.life--;
+    });
+    comboPops = comboPops.filter((c) => c.life > 0);
+
+    // 👾 Boss "Segmentation Fault" tiap 1.000 poin
+    if (!boss && Math.floor(score / 1000) > bossesSpawned) {
+      bossesSpawned++;
+      boss = { x: W / 2, y: 74, hp: 6, t: 0 };
+      toastQueue.push({
+        text: "👾 BOSS: Segmentation Fault terdeteksi! Bertahan 15 detik atau hancurkan!",
+        at: frame + 5,
+      });
+      sfx("boss");
+    }
+    if (boss) {
+      boss.t++;
+      boss.x = W / 2 + Math.sin(boss.t * 0.025) * (W * 0.33);
+      boss.y = 74 + Math.sin(boss.t * 0.06) * 12;
+      // menjatuhkan error kecil tiap ~55 frame
+      if (boss.t % 55 === 0) {
+        rocks.push({
+          type: { emoji: "❗", label: "Error", spin: false },
+          trail: null,
+          x: boss.x,
+          y: boss.y + 30,
+          r: 11,
+          vy: 3.4 * (chaosMode ? 1.3 : 1),
+          wobble: Math.random() * 600,
+          angle: 0,
+          spin: 0,
+        });
+      }
+      if (boss.hp <= 0) {
+        // 🎉 boss hancur
+        score += 200;
+        spawnParticles(boss.x, boss.y, "rgba(239, 68, 68, 0.95)", 34, 5);
+        spawnParticles(boss.x, boss.y, "rgba(250, 204, 21, 0.95)", 22, 4);
+        comboPops.push({
+          x: boss.x,
+          y: boss.y,
+          text: "BOSS DIHANCURKAN! +200",
+          life: 80,
+        });
+        toastQueue.push({
+          text: "🎉 Segmentation Fault diperbaiki! +200 poin!",
+          at: frame + 5,
+        });
+        boss = null;
+        sfx("record");
+      } else if (boss.t >= 900) {
+        // bertahan 15 detik — boss mundur
+        score += 100;
+        comboPops.push({
+          x: boss.x,
+          y: boss.y,
+          text: "BERTAHAN! +100",
+          life: 80,
+        });
+        boss = null;
+        sfx("power");
+      }
+    }
 
     // Skor bertambah seiring waktu
     if (frame % 6 === 0) score++;
@@ -1063,13 +1352,58 @@ document.getElementById("year").textContent = new Date().getFullYear();
       }
       g.restore();
     }
-    drawEmoji("🚀", ship.x, ship.y, ship.r * 2.3, ship.vx * 0.045 - 0.78);
+    drawEmoji(shipSkin, ship.x, ship.y, ship.r * 2.3, ship.vx * 0.045 - 0.78);
     if (vipMode) {
       drawEmoji("✨", ship.x + 9, ship.y + 10, 12); // lencana edisi Aurora
     }
     if (chaosMode) {
       drawEmoji("🔥", ship.x + 9, ship.y + 12, 12); // ekor api sang rival
     }
+
+    // 💥 Partikel
+    for (const p of particles) {
+      g.globalAlpha = Math.max(p.life / p.max, 0);
+      g.fillStyle = p.color;
+      g.beginPath();
+      g.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      g.fill();
+    }
+    g.globalAlpha = 1;
+
+    // 👾 Boss Segmentation Fault
+    if (boss) {
+      const bg2 = g.createRadialGradient(boss.x, boss.y, 4, boss.x, boss.y, 52);
+      bg2.addColorStop(0, "rgba(239, 68, 68, 0.35)");
+      bg2.addColorStop(1, "rgba(239, 68, 68, 0)");
+      g.fillStyle = bg2;
+      g.beginPath();
+      g.arc(boss.x, boss.y, 52, 0, Math.PI * 2);
+      g.fill();
+      drawEmoji("🐛", boss.x, boss.y, 52, Math.sin(boss.t * 0.05) * 0.2);
+      // bar nyawa
+      const bw = 76;
+      g.fillStyle = "rgba(255, 255, 255, 0.18)";
+      g.fillRect(boss.x - bw / 2, boss.y - 46, bw, 6);
+      g.fillStyle = "rgba(239, 68, 68, 0.9)";
+      g.fillRect(boss.x - bw / 2, boss.y - 46, (bw * boss.hp) / 6, 6);
+      drawLabel(
+        "SEGMENTATION FAULT",
+        boss.x,
+        boss.y - 40,
+        "rgba(252, 165, 165, 0.95)",
+      );
+    }
+
+    // 🔥 Teks combo mengambang
+    for (const c of comboPops) {
+      g.globalAlpha = Math.max(c.life / 55, 0);
+      g.font = "700 13px 'Space Grotesk', sans-serif";
+      g.textAlign = "center";
+      g.textBaseline = "middle";
+      g.fillStyle = "#fde68a";
+      g.fillText(c.text, c.x, c.y);
+    }
+    g.globalAlpha = 1;
 
     // Indikator efek aktif (kiri atas kanvas)
     const fx = [];
@@ -1078,6 +1412,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
     if (shieldCount > 0) fx.push(`🛡️ Shield x${shieldCount}`);
     if (drone) fx.push(`🛰️ Drone siap ${Math.ceil(droneCooldown / 60)}s`);
     if (chaosMode) fx.push("💀 Protokol Rival AKTIF");
+    if (combo >= 2) fx.push(`🔥 Combo x${combo}`);
     g.font = "600 13px 'Space Grotesk', sans-serif";
     g.textAlign = "left";
     g.textBaseline = "top";
@@ -1265,6 +1600,12 @@ document.getElementById("year").textContent = new Date().getFullYear();
     }
 
     reset();
+    // 🚀 Validasi skin: bila skin terpilih belum terbuka utk pilot ini, pakai klasik
+    const ownedSkins = unlockedBadges(playerName);
+    const chosen = skins.find((s) => s.emoji === shipSkin);
+    if (chosen && chosen.need && !ownedSkins.has(chosen.need)) {
+      shipSkin = "🚀";
+    }
     // 🎮 Bonus stat VIP: roket lebih lincah + 1 shield gratis
     ship.speed = vipMode ? 6.8 : 6;
     if (vipMode) shieldCount = 1;
@@ -1292,6 +1633,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
     }
 
     playing = true;
+    sfx("power"); // 🔊 aktifkan audio lewat gesture pengguna
     overlay.classList.add("hidden");
     requestAnimationFrame(loop);
   }
@@ -1384,6 +1726,14 @@ document.getElementById("year").textContent = new Date().getFullYear();
     frameEl.classList.add("shake");
     setTimeout(() => frameEl.classList.remove("shake"), 500);
 
+    // 🔊 Suara kalah / rekor
+    sfx("over");
+    if (isRecord || rank === 1) setTimeout(() => sfx("record"), 550);
+
+    // 📤 Simpan hasil untuk tombol "Tantang Temanmu"
+    lastScore = score;
+    lastRank = rank;
+
     overlay.classList.toggle("vip-holo", vipMode);
     overlay.classList.toggle("chaos-holo", chaosMode);
     bestEl.textContent = getBest(playerName);
@@ -1394,15 +1744,43 @@ document.getElementById("year").textContent = new Date().getFullYear();
         : "Main Lagi 🔁";
     overlay.classList.remove("hidden");
     renderBoard(playerName);
+    renderSkins(); // lencana baru bisa membuka skin baru
     draw();
   }
 
   startBtn.addEventListener("click", start);
 
+  // 📤 Tantang teman via WhatsApp / share bawaan HP
+  document.getElementById("go-share").addEventListener("click", () => {
+    const teks =
+      `Aku baru mencetak ${lastScore} poin (peringkat #${lastRank}) di Astro Dodge 🚀 ` +
+      `Berani lawan aku? 👉 https://emil-02.github.io/Web_Amboyy/#game`;
+    if (navigator.share) {
+      navigator.share({ text: teks }).catch(() => {});
+    } else {
+      window.open(
+        `https://wa.me/?text=${encodeURIComponent(teks)}`,
+        "_blank",
+        "noopener",
+      );
+    }
+  });
+
+  // 🔊 Tombol mute
+  const muteBtn = document.getElementById("game-mute");
+  muteBtn.textContent = muted ? "🔇" : "🔊";
+  muteBtn.addEventListener("click", () => {
+    muted = !muted;
+    localStorage.setItem("astroMuted", muted ? "1" : "0");
+    muteBtn.textContent = muted ? "🔇" : "🔊";
+    if (!muted) sfx("power");
+  });
+
   // Input nama: Enter = mulai, ketikan tidak bocor ke kontrol game
-  nameInput.addEventListener("input", () =>
-    nameInput.classList.remove("error"),
-  );
+  nameInput.addEventListener("input", () => {
+    nameInput.classList.remove("error");
+    renderSkins(); // skin yang terbuka mengikuti nama yang diketik
+  });
   nameInput.addEventListener("keydown", (e) => {
     e.stopPropagation();
     if (e.key === "Enter") start();
@@ -1476,6 +1854,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
   makeBgDots();
   draw();
   renderBoard(playerName);
+  renderSkins();
   if (playerName) {
     playerEl.textContent = playerName;
     bestEl.textContent = getBest(playerName);
