@@ -549,6 +549,10 @@ document.getElementById("year").textContent = new Date().getFullYear();
   let comboPops = []; // teks mengambang "NYARIS! +N"
   let lastScore = 0; // untuk tombol share
   let lastRank = 0;
+  let pointerTarget = null; // posisi jari/kursor — kapal meluncur mulus ke sana
+  let lastShownScore = -1; // hindari tulis DOM tiap frame
+  let lastTime = 0; // fixed-timestep accumulator
+  let acc = 0;
 
   // ---- 🔊 Suara retro (Web Audio API, tanpa file) ----
   let audioCtx = null;
@@ -798,15 +802,81 @@ document.getElementById("year").textContent = new Date().getFullYear();
     }));
   }
 
+  // 🎯 Sprite cache: emoji digambar SEKALI ke kanvas kecil lalu di-drawImage
+  // (fillText tiap objek tiap frame jauh lebih berat — ini kunci kehalusan)
+  const spriteCache = new Map();
+  function emojiSprite(emoji, size) {
+    const key = emoji + "@" + size;
+    let c = spriteCache.get(key);
+    if (!c) {
+      const pad = Math.ceil(size * 0.35);
+      c = document.createElement("canvas");
+      c.width = c.height = size + pad * 2;
+      const cg = c.getContext("2d");
+      cg.font = `${size}px serif`;
+      cg.textAlign = "center";
+      cg.textBaseline = "middle";
+      cg.fillText(emoji, c.width / 2, c.height / 2);
+      spriteCache.set(key, c);
+    }
+    return c;
+  }
+
   function drawEmoji(emoji, x, y, size, angle = 0) {
-    g.save();
-    g.translate(x, y);
-    if (angle) g.rotate(angle);
-    g.font = `${size}px serif`;
-    g.textAlign = "center";
-    g.textBaseline = "middle";
-    g.fillText(emoji, 0, 0);
-    g.restore();
+    // bulatkan ukuran ke kelipatan 2 agar cache tidak membengkak
+    const s = emojiSprite(emoji, Math.max(8, Math.round(size / 2) * 2));
+    if (angle) {
+      g.save();
+      g.translate(x, y);
+      g.rotate(angle);
+      g.drawImage(s, -s.width / 2, -s.height / 2);
+      g.restore();
+    } else {
+      g.drawImage(s, x - s.width / 2, y - s.height / 2);
+    }
+  }
+
+  // ✨ Glow cache: lingkaran cahaya dirender sekali, dipakai berulang
+  function drawGlow(rgb, alpha, radius, x, y) {
+    const key = `glow:${rgb}:${alpha}:${radius}`;
+    let c = spriteCache.get(key);
+    if (!c) {
+      c = document.createElement("canvas");
+      c.width = c.height = radius * 2;
+      const cg = c.getContext("2d");
+      const rg = cg.createRadialGradient(
+        radius,
+        radius,
+        radius * 0.05,
+        radius,
+        radius,
+        radius,
+      );
+      rg.addColorStop(0, `rgba(${rgb}, ${alpha})`);
+      rg.addColorStop(1, `rgba(${rgb}, 0)`);
+      cg.fillStyle = rg;
+      cg.fillRect(0, 0, radius * 2, radius * 2);
+      spriteCache.set(key, c);
+    }
+    g.drawImage(c, x - radius, y - radius);
+  }
+
+  // 🌌 Latar VIP pra-render (gradien statis tak perlu dihitung tiap frame)
+  let vipBg = null;
+  function vipBgCache() {
+    if (!vipBg) {
+      vipBg = document.createElement("canvas");
+      vipBg.width = W;
+      vipBg.height = H;
+      const c = vipBg.getContext("2d");
+      const grad = c.createLinearGradient(0, 0, 0, H);
+      grad.addColorStop(0, "#04121f");
+      grad.addColorStop(0.55, "#0a1b2e");
+      grad.addColorStop(1, "#060d1f");
+      c.fillStyle = grad;
+      c.fillRect(0, 0, W, H);
+    }
+    return vipBg;
   }
 
   function reset() {
@@ -832,6 +902,8 @@ document.getElementById("year").textContent = new Date().getFullYear();
     transmissionShown = false;
     transmissionFrames = 0;
     divertFrames = 0;
+    pointerTarget = null;
+    lastShownScore = -1;
     ship.x = W / 2;
     ship.vx = 0;
     scoreEl.textContent = "0";
@@ -894,11 +966,21 @@ document.getElementById("year").textContent = new Date().getFullYear();
       divertFrames = 360; // sistem sungguhan mengalihkan meteor dari jalurnya
     }
 
-    // Gerak kapal (⚡ JS Boost = lebih gesit)
+    // Gerak kapal — akselerasi & pengereman halus (⚡ JS Boost = lebih gesit)
     const speed = boostFrames > 0 ? 9 : ship.speed;
     const left = keys.ArrowLeft || keys.a || keys.A;
     const right = keys.ArrowRight || keys.d || keys.D;
-    ship.vx = (right ? speed : 0) - (left ? speed : 0);
+    if (left || right) pointerTarget = null; // keyboard mengambil alih
+    if (pointerTarget !== null) {
+      // sentuh/mouse: meluncur mulus menuju posisi jari (easing)
+      const dx = (pointerTarget - ship.x) * 0.32;
+      ship.vx += (dx - ship.vx) * 0.55;
+    } else {
+      const targetVx = (right ? speed : 0) - (left ? speed : 0);
+      ship.vx += (targetVx - ship.vx) * 0.28;
+    }
+    ship.vx = Math.max(-15, Math.min(15, ship.vx));
+    if (Math.abs(ship.vx) < 0.01) ship.vx = 0;
     ship.x = Math.max(ship.r, Math.min(W - ship.r, ship.x + ship.vx));
 
     // Spawn rintangan & power-up
@@ -1125,9 +1207,12 @@ document.getElementById("year").textContent = new Date().getFullYear();
       }
     }
 
-    // Skor bertambah seiring waktu
+    // Skor bertambah seiring waktu (tulis DOM hanya saat berubah)
     if (frame % 6 === 0) score++;
-    scoreEl.textContent = score;
+    if (score !== lastShownScore) {
+      lastShownScore = score;
+      scoreEl.textContent = score;
+    }
   }
 
   function drawLabel(text, x, y, color) {
@@ -1143,52 +1228,11 @@ document.getElementById("year").textContent = new Date().getFullYear();
 
     // � VIP Mode: Aurora Voyager — langit hijau-ungu bercahaya
     if (vipMode) {
-      const grad = g.createLinearGradient(0, 0, 0, H);
-      grad.addColorStop(0, "#04121f");
-      grad.addColorStop(0.55, "#0a1b2e");
-      grad.addColorStop(1, "#060d1f");
-      g.fillStyle = grad;
-      g.fillRect(0, 0, W, H);
-
+      g.drawImage(vipBgCache(), 0, 0);
       const sway = Math.sin(frame * 0.004) * 60;
-      let neb = g.createRadialGradient(
-        W * 0.28 + sway,
-        H * 0.22,
-        10,
-        W * 0.28 + sway,
-        H * 0.22,
-        260,
-      );
-      neb.addColorStop(0, "rgba(52, 211, 153, 0.18)");
-      neb.addColorStop(1, "rgba(52, 211, 153, 0)");
-      g.fillStyle = neb;
-      g.fillRect(0, 0, W, H);
-
-      neb = g.createRadialGradient(
-        W * 0.72 - sway,
-        H * 0.42,
-        10,
-        W * 0.72 - sway,
-        H * 0.42,
-        270,
-      );
-      neb.addColorStop(0, "rgba(139, 92, 246, 0.17)");
-      neb.addColorStop(1, "rgba(139, 92, 246, 0)");
-      g.fillStyle = neb;
-      g.fillRect(0, 0, W, H);
-
-      neb = g.createRadialGradient(
-        W * 0.5,
-        H * 0.88,
-        10,
-        W * 0.5,
-        H * 0.88,
-        240,
-      );
-      neb.addColorStop(0, "rgba(45, 212, 191, 0.13)");
-      neb.addColorStop(1, "rgba(45, 212, 191, 0)");
-      g.fillStyle = neb;
-      g.fillRect(0, 0, W, H);
+      drawGlow("52, 211, 153", 0.18, 260, W * 0.28 + sway, H * 0.22);
+      drawGlow("139, 92, 246", 0.17, 270, W * 0.72 - sway, H * 0.42);
+      drawGlow("45, 212, 191", 0.13, 240, W * 0.5, H * 0.88);
     }
 
     // Bintang latar
@@ -1209,28 +1253,18 @@ document.getElementById("year").textContent = new Date().getFullYear();
 
     // Rintangan (label merah untuk masalah developer)
     for (const o of rocks) {
-      // 🌠 Jejak cahaya komet (VIP Mode)
+      // 🌠 Jejak cahaya komet (VIP Mode) — goresan solid murah
       if (vipMode && o.trail) {
         const len = o.r * 3.2 + o.vy * 6;
-        const tg = g.createLinearGradient(
-          o.x,
-          o.y - o.r * 0.6,
-          o.x,
-          o.y - o.r - len,
-        );
-        tg.addColorStop(
-          0,
-          o.trail === "gold"
-            ? "rgba(52, 211, 153, 0.6)"
-            : "rgba(167, 139, 250, 0.6)",
-        );
-        tg.addColorStop(1, "rgba(0, 0, 0, 0)");
-        g.strokeStyle = tg;
+        g.globalAlpha = 0.45;
+        g.strokeStyle = o.trail === "gold" ? "#34d399" : "#a78bfa";
         g.lineWidth = 3;
+        g.lineCap = "round";
         g.beginPath();
         g.moveTo(o.x, o.y - o.r * 0.6);
         g.lineTo(o.x, o.y - o.r - len);
         g.stroke();
+        g.globalAlpha = 1;
       }
       drawEmoji(o.type.emoji, o.x, o.y, o.r * 2, o.angle);
       if (o.type.label) {
@@ -1259,20 +1293,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
       g.restore();
     }
     if (drone) {
-      const dg = g.createRadialGradient(
-        drone.x,
-        drone.y,
-        1,
-        drone.x,
-        drone.y,
-        16,
-      );
-      dg.addColorStop(0, "rgba(52, 211, 153, 0.4)");
-      dg.addColorStop(1, "rgba(52, 211, 153, 0)");
-      g.fillStyle = dg;
-      g.beginPath();
-      g.arc(drone.x, drone.y, 16, 0, Math.PI * 2);
-      g.fill();
+      drawGlow("52, 211, 153", 0.4, 16, drone.x, drone.y);
       drawEmoji("🛰️", drone.x, drone.y, 17);
     }
 
@@ -1301,37 +1322,11 @@ document.getElementById("year").textContent = new Date().getFullYear();
 
     // Kapal miring sesuai arah gerak (🌌 VIP Mode: roket Aurora)
     if (vipMode) {
-      const glow = g.createRadialGradient(
-        ship.x,
-        ship.y,
-        2,
-        ship.x,
-        ship.y,
-        36,
-      );
-      glow.addColorStop(0, "rgba(52, 211, 153, 0.32)");
-      glow.addColorStop(1, "rgba(52, 211, 153, 0)");
-      g.fillStyle = glow;
-      g.beginPath();
-      g.arc(ship.x, ship.y, 36, 0, Math.PI * 2);
-      g.fill();
+      drawGlow("52, 211, 153", 0.32, 36, ship.x, ship.y);
     }
     // 💀 Chaos: roket Merah Membara dengan petir di ekor
     if (chaosMode) {
-      const glow = g.createRadialGradient(
-        ship.x,
-        ship.y,
-        2,
-        ship.x,
-        ship.y,
-        38,
-      );
-      glow.addColorStop(0, "rgba(239, 68, 68, 0.42)");
-      glow.addColorStop(1, "rgba(239, 68, 68, 0)");
-      g.fillStyle = glow;
-      g.beginPath();
-      g.arc(ship.x, ship.y, 38, 0, Math.PI * 2);
-      g.fill();
+      drawGlow("239, 68, 68", 0.42, 38, ship.x, ship.y);
 
       g.save();
       g.strokeStyle = "rgba(252, 165, 165, 0.9)";
@@ -1360,25 +1355,17 @@ document.getElementById("year").textContent = new Date().getFullYear();
       drawEmoji("🔥", ship.x + 9, ship.y + 12, 12); // ekor api sang rival
     }
 
-    // 💥 Partikel
+    // 💥 Partikel (kotak kecil — lebih murah dari arc, tetap terlihat retro)
     for (const p of particles) {
       g.globalAlpha = Math.max(p.life / p.max, 0);
       g.fillStyle = p.color;
-      g.beginPath();
-      g.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      g.fill();
+      g.fillRect(p.x - p.r, p.y - p.r, p.r * 2, p.r * 2);
     }
     g.globalAlpha = 1;
 
     // 👾 Boss Segmentation Fault
     if (boss) {
-      const bg2 = g.createRadialGradient(boss.x, boss.y, 4, boss.x, boss.y, 52);
-      bg2.addColorStop(0, "rgba(239, 68, 68, 0.35)");
-      bg2.addColorStop(1, "rgba(239, 68, 68, 0)");
-      g.fillStyle = bg2;
-      g.beginPath();
-      g.arc(boss.x, boss.y, 52, 0, Math.PI * 2);
-      g.fill();
+      drawGlow("239, 68, 68", 0.35, 52, boss.x, boss.y);
       drawEmoji("🐛", boss.x, boss.y, 52, Math.sin(boss.t * 0.05) * 0.2);
       // bar nyawa
       const bw = 76;
@@ -1559,9 +1546,18 @@ document.getElementById("year").textContent = new Date().getFullYear();
     }
   }
 
-  function loop() {
+  // ⏱️ Fixed timestep: logika selalu 60 langkah/detik di monitor 60Hz, 120Hz,
+  // maupun HP lambat — render tiap frame. Hasil: kecepatan konsisten & mulus.
+  const STEP = 1000 / 60;
+  function loop(now) {
     if (!playing) return;
-    update();
+    if (!lastTime) lastTime = now;
+    acc += Math.min(now - lastTime, 100); // clamp bila tab sempat tersembunyi
+    lastTime = now;
+    while (acc >= STEP && playing) {
+      update();
+      acc -= STEP;
+    }
     if (playing) {
       draw();
       requestAnimationFrame(loop);
@@ -1633,6 +1629,8 @@ document.getElementById("year").textContent = new Date().getFullYear();
     }
 
     playing = true;
+    lastTime = 0;
+    acc = 0;
     sfx("power"); // 🔊 aktifkan audio lewat gesture pengguna
     overlay.classList.add("hidden");
     requestAnimationFrame(loop);
@@ -1795,10 +1793,10 @@ document.getElementById("year").textContent = new Date().getFullYear();
   });
   window.addEventListener("keyup", (e) => (keys[e.key] = false));
 
-  // Sentuh / geser di HP dan drag mouse
+  // Sentuh / geser di HP dan drag mouse — target di-easing di update()
   function pointerMove(clientX) {
     const rect = cv.getBoundingClientRect();
-    ship.x = Math.max(
+    pointerTarget = Math.max(
       ship.r,
       Math.min(W - ship.r, ((clientX - rect.left) / rect.width) * W),
     );
@@ -1835,6 +1833,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
     if (pausedByRules) {
       pausedByRules = false;
       playing = true;
+      lastTime = 0; // reset timer agar tak ada lompatan setelah jeda
       requestAnimationFrame(loop);
     }
   }
