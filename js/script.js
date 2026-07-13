@@ -431,6 +431,14 @@ document.getElementById("year").textContent = new Date().getFullYear();
     return { rank, improved, newBadges };
   }
 
+  // 🌐 Papan global (Firebase): terima pembaruan live bila tersedia
+  window.addEventListener("cosmic:board", (e) => {
+    board = e.detail;
+    localStorage.setItem("astroDodgeBoard", JSON.stringify(board));
+    renderBoard(playerName);
+    if (playerName) bestEl.textContent = getBest(playerName);
+  });
+
   const ship = { x: W / 2, y: H - 46, r: 17, vx: 0, speed: 6 };
 
   // Rintangan: meteor + masalah sehari-hari developer
@@ -1152,7 +1160,6 @@ document.getElementById("year").textContent = new Date().getFullYear();
       if (p < 1 && !playing) requestAnimationFrame(tick);
     })(startT);
   }
-
   function gameOver() {
     playing = false;
     const prevBest = getBest(playerName);
@@ -1163,6 +1170,11 @@ document.getElementById("year").textContent = new Date().getFullYear();
       vipMode,
     );
     const isRecord = improved && score > 0 && prevBest > 0;
+    // 🌐 Kirim hasil terbaik pilot ini ke papan global
+    const myEntry = board.find(
+      (e) => e.name.toLowerCase() === playerName.toLowerCase(),
+    );
+    if (myEntry && window.cosmicDB) window.cosmicDB.submit(myEntry);
 
     // Judul & kalimat singkat — angka-angka tampil di panel hasil
     if (vipMode) {
