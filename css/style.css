@@ -1175,6 +1175,65 @@ body {
   .scroll-down {
     display: none;
   }
+
+  /* --- HP: kartu keahlian berjejer 2, ukuran dipadatkan --- */
+  .skills-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+  .skill-card {
+    padding: 18px 16px;
+  }
+  .skill-icon {
+    font-size: 1.7rem;
+    margin-bottom: 8px;
+  }
+  .skill-card h3 {
+    font-size: 0.92rem;
+    margin-bottom: 12px;
+  }
+  .skill-bar {
+    height: 6px;
+  }
+  .skill-percent {
+    font-size: 0.75rem;
+    margin-top: 6px;
+  }
+
+  /* --- HP: kartu proyek berjejer 2, thumb & teks dipadatkan --- */
+  .projects-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+  .project-thumb {
+    height: 110px;
+    font-size: 2.4rem;
+  }
+  .project-body {
+    padding: 14px;
+  }
+  .project-body h3 {
+    font-size: 1rem;
+    margin-bottom: 6px;
+  }
+  .project-body p {
+    font-size: 0.78rem;
+    margin-bottom: 12px;
+  }
+  .project-tags {
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .project-tags span {
+    font-size: 0.62rem;
+    padding: 3px 9px;
+  }
+  .project-links {
+    gap: 12px;
+  }
+  .project-links a {
+    font-size: 0.78rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
