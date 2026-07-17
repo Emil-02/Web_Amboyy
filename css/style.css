@@ -1741,12 +1741,42 @@ body {
     font-size: 0.8rem;
   }
 
+  /* --- Layar hasil (game over): frame melar mengikuti isi.
+     Canvas game disembunyikan sementara & overlay masuk aliran normal,
+     jadi skor + statistik + lencana + tombol tampil utuh tanpa scroll --- */
+  .game-frame:has(.game-overlay:not(.hidden) .go-result:not(.hidden))
+    #game-canvas {
+    display: none;
+  }
+  .game-frame:has(.game-overlay:not(.hidden) .go-result:not(.hidden))
+    .game-overlay {
+    position: static;
+    padding: 22px 14px;
+  }
+
+  .game-overlay .go-score-label {
+    letter-spacing: 2.5px;
+  }
   .game-overlay .go-score {
     font-size: 2.5rem;
   }
+  .go-stats {
+    gap: 8px;
+  }
   .go-stat {
-    min-width: 74px;
-    padding: 8px 9px;
+    min-width: 68px;
+    padding: 7px 8px;
+  }
+  .go-stat b {
+    font-size: 0.9rem;
+  }
+  .go-stat small {
+    font-size: 0.54rem;
+    letter-spacing: 1px;
+  }
+  .go-share {
+    padding: 8px 20px;
+    font-size: 0.75rem;
   }
   .game-overlay:has(.go-result:not(.hidden)) h3 {
     font-size: 1.25rem;
