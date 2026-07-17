@@ -864,6 +864,9 @@ body {
 .thumb-6 {
   background: linear-gradient(135deg, #1e1b4b, #5b21b6, #0891b2);
 }
+.thumb-7 {
+  background: linear-gradient(135deg, #082f49, #0891b2, #10b981);
+}
 
 .projects-cta {
   text-align: center;
