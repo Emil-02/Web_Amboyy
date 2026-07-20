@@ -12,7 +12,10 @@
     const pending = addMessage("NOVA sedang merangkai jawaban", "bot", "ai-typing");
     try {
       if (!API_URL) throw new Error("not-configured");
-      const response = await fetch(API_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ messages: history.slice(-8) }) });
+      const [response] = await Promise.all([
+        fetch(API_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ messages: history.slice(-8) }) }),
+        new Promise((resolve) => setTimeout(resolve, 850 + Math.random() * 450)),
+      ]);
       const data = await response.json().catch(() => ({})); if (!response.ok) throw new Error(data.error || "request-failed");
       pending.remove(); const reply = data.reply || "Maaf, aku belum menemukan jawaban untuk itu."; addMessage(reply, "bot"); history.push({ role: "assistant", content: reply });
     } catch (error) { pending.remove(); addMessage(error.message === "not-configured" ? "NOVA belum terhubung ke server AI. Pemilik situs perlu mengisi URL Cloudflare Worker di js/ai-chat.js." : "Sinyal ke NOVA sedang terganggu. Coba lagi sebentar, ya.", "bot"); }
