@@ -1,7 +1,7 @@
 /* NOVA — API key tidak pernah berada di browser. */
 (() => {
   // Isi setelah Worker dideploy, misalnya: https://nova-api.nama.workers.dev
-  const API_URL = "";
+  const API_URL = "https://nova-portfolio-ai.dcin5344.workers.dev";
   const panel = document.getElementById("ai-panel"), launcher = document.getElementById("ai-launcher"), close = document.getElementById("ai-close"), form = document.getElementById("ai-form"), input = document.getElementById("ai-input"), messages = document.getElementById("ai-messages"), suggestions = document.getElementById("ai-suggestions");
   const history = [];
   function setOpen(open) { panel.classList.toggle("open", open); panel.setAttribute("aria-hidden", String(!open)); launcher.setAttribute("aria-expanded", String(open)); if (open) input.focus(); }
