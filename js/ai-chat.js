@@ -9,7 +9,13 @@
   async function send(text) {
     const message = text.trim(); if (!message) return;
     addMessage(message, "user"); history.push({ role: "user", content: message }); input.value = "";
-    const pending = addMessage("NOVA sedang merangkai jawaban", "bot", "ai-typing");
+    const pending = addMessage("", "bot", "ai-typing");
+    const label = document.createElement("span");
+    label.textContent = "NOVA sedang berpikir";
+    const dots = document.createElement("span");
+    dots.className = "ai-thinking-dots";
+    for (let i = 0; i < 3; i++) dots.appendChild(document.createElement("i"));
+    pending.append(label, dots);
     try {
       if (!API_URL) throw new Error("not-configured");
       const [response] = await Promise.all([
