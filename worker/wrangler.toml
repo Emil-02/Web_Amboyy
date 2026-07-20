@@ -1,0 +1,8 @@
+name = "nova-portfolio-ai"
+main = "src/index.js"
+compatibility_date = "2026-07-20"
+
+[vars]
+GROQ_MODEL = "llama-3.1-8b-instant"
+OPENROUTER_MODEL = "meta-llama/llama-3.1-8b-instruct:free"
+SITE_URL = "https://emil-02.github.io/Web_Amboyy/"

@@ -909,7 +909,31 @@
       🚀
     </button>
 
+    <!-- ===== NOVA: Asisten AI ===== -->
+    <aside class="ai-widget" aria-label="NOVA, asisten AI portofolio">
+      <section class="ai-panel" id="ai-panel" aria-hidden="true">
+        <header class="ai-panel-head">
+          <img src="img/nova-avatar.png" alt="Avatar NOVA, asisten AI" />
+          <div><p>NOVA <span class="ai-online">online</span></p><small>Asisten Portofolio Amboyy</small></div>
+          <button class="ai-close" id="ai-close" aria-label="Tutup chat">&times;</button>
+        </header>
+        <div class="ai-messages" id="ai-messages" aria-live="polite">
+          <article class="ai-message ai-bot">Hai! Aku NOVA ✨ Tanyakan apa saja tentang Amboyy, proyek, keahlian, atau cara menghubunginya.</article>
+        </div>
+        <div class="ai-suggestions" id="ai-suggestions">
+          <button type="button">Apa keahliannya?</button><button type="button">Proyek terbaru?</button><button type="button">Bagaimana menghubungi?</button>
+        </div>
+        <form class="ai-form" id="ai-form">
+          <label class="sr-only" for="ai-input">Pesan untuk NOVA</label>
+          <input id="ai-input" type="text" maxlength="500" placeholder="Tulis pertanyaanmu..." autocomplete="off" required />
+          <button type="submit" aria-label="Kirim pesan">➤</button>
+        </form>
+        <p class="ai-note">NOVA dapat keliru. Jangan kirim data pribadi atau rahasia.</p>
+      </section>
+      <button class="ai-launcher" id="ai-launcher" aria-label="Buka chat dengan NOVA" aria-expanded="false"><img src="img/nova-avatar.png" alt="" /><span>Chat dengan NOVA</span></button>
+    </aside>
     <script src="js/script.js"></script>
+    <script src="js/ai-chat.js"></script>
     <script type="module" src="js/firebase.js"></script>
   </body>
 </html>
