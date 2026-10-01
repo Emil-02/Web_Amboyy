@@ -1,0 +1,6 @@
+﻿
+# --- jangan upload file rahasia ---
+.env
+.env.*
+!.env.example
+*.env
