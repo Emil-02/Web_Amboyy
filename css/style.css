@@ -20,7 +20,7 @@
     var(--pink),
     var(--cyan)
   );
-  --font-head: "Space Grotesk", sans-serif;
+  --font-head: "Poppins", sans-serif;
   --font-body: "Poppins", sans-serif;
   --font-logo: "Orbitron", sans-serif;
   --radius: 16px;
@@ -753,7 +753,7 @@ body {
 /* ============ Keahlian ============ */
 .skills-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 24px;
 }
 
@@ -782,27 +782,30 @@ body {
   font-size: 1.1rem;
   margin-bottom: 16px;
 }
-.skill-bar {
-  height: 8px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-  overflow: hidden;
+.skill-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 14px;
 }
-.skill-progress {
-  height: 100%;
-  width: 0;
-  border-radius: 999px;
-  background: var(--gradient);
-  box-shadow: 0 0 12px rgba(34, 211, 238, 0.6);
-  transition: width 1.4s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.skill-percent {
-  display: block;
-  text-align: right;
-  margin-top: 8px;
-  font-size: 0.82rem;
-  color: var(--cyan);
+.skill-stack span {
+  font-size: 0.74rem;
   font-family: var(--font-head);
+  font-weight: 500;
+  padding: 4px 11px;
+  border-radius: 999px;
+  color: #e9d5ff;
+  background: rgba(139, 92, 246, 0.12);
+  border: 1px solid rgba(139, 92, 246, 0.32);
+}
+.skill-used {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+.skill-used strong {
+  color: var(--cyan);
+  font-weight: 500;
 }
 
 /* ============ Proyek ============ */
@@ -867,6 +870,110 @@ body {
 .thumb-7 {
   background: linear-gradient(135deg, #082f49, #0891b2, #10b981);
 }
+.thumb-8 {
+  background: linear-gradient(135deg, #3f0d12, #b91c1c, #f59e0b);
+}
+.thumb-6b {
+  background: linear-gradient(135deg, #0f0a2e, #6d28d9, #ec4899);
+}
+
+/* Screenshot asli proyek */
+.project-thumb.has-shot img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  transition: transform 0.6s ease;
+}
+.project-card:hover .project-thumb.has-shot img {
+  transform: scale(1.05);
+}
+.project-thumb.shot-phone {
+  align-items: end;
+}
+.project-thumb.shot-phone img {
+  height: 92%;
+  width: auto;
+  max-width: 70%;
+  object-fit: cover;
+  object-position: top;
+  border-radius: 14px 14px 0 0;
+  border: 3px solid rgba(255, 255, 255, 0.85);
+  border-bottom: 0;
+  box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.35);
+  transform: translateY(6%);
+  transition: transform 0.5s ease;
+}
+.project-card:hover .project-thumb.shot-phone img {
+  transform: translateY(0);
+}
+.project-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 1;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font: 600 0.68rem var(--font-head);
+  letter-spacing: 0.5px;
+  color: #fff;
+  background: rgba(5, 5, 16, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(6px);
+}
+.project-badge.live {
+  color: #6ee7b7;
+  border-color: rgba(52, 211, 153, 0.55);
+}
+.project-thumb .project-badge {
+  font-size: 0.68rem;
+  filter: none;
+}
+
+/* Filter kategori proyek */
+.project-filter {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 32px;
+}
+.project-filter button {
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 1px solid var(--card-border);
+  background: var(--card);
+  color: var(--text-muted);
+  font: 500 0.85rem var(--font-head);
+  cursor: pointer;
+  transition:
+    color 0.25s ease,
+    border-color 0.25s ease,
+    background 0.25s ease;
+}
+.project-filter button:hover {
+  color: var(--text);
+  border-color: rgba(34, 211, 238, 0.5);
+}
+.project-filter button.active {
+  color: #fff;
+  background: var(--gradient);
+  border-color: transparent;
+}
+.project-card[hidden] {
+  display: none;
+}
+.project-card.filter-in {
+  animation: card-in 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.97);
+  }
+}
 
 .projects-cta {
   text-align: center;
@@ -905,9 +1012,12 @@ body {
 
 .project-links {
   display: flex;
-  gap: 18px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 18px;
 }
-.project-links a {
+.project-links a,
+.project-private {
   font-size: 0.88rem;
   color: var(--text-muted);
   text-decoration: none;
@@ -915,6 +1025,111 @@ body {
 }
 .project-links a:hover {
   color: var(--cyan);
+}
+.project-private {
+  opacity: 0.75;
+}
+.project-more {
+  margin-left: auto;
+  padding: 5px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(139, 92, 246, 0.45);
+  background: rgba(139, 92, 246, 0.12);
+  color: #e9d5ff;
+  font: 500 0.8rem var(--font-head);
+  cursor: pointer;
+  transition:
+    background 0.25s ease,
+    border-color 0.25s ease;
+}
+.project-more:hover {
+  background: rgba(139, 92, 246, 0.28);
+  border-color: var(--cyan);
+}
+
+/* Dialog detail proyek */
+.project-dialog {
+  width: min(560px, calc(100vw - 32px));
+  max-height: min(86vh, 760px);
+  margin: auto;
+  padding: 28px;
+  color: var(--text);
+  background: rgba(10, 10, 30, 0.97);
+  border: 1px solid rgba(139, 92, 246, 0.45);
+  border-radius: 20px;
+  box-shadow:
+    0 24px 70px rgba(0, 0, 0, 0.6),
+    var(--shadow-glow);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.project-dialog[open] {
+  animation: dialog-in 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.project-dialog::backdrop {
+  background: rgba(3, 3, 12, 0.72);
+  backdrop-filter: blur(4px);
+}
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+}
+body:has(.project-dialog[open]) {
+  overflow: hidden;
+}
+.pd-close {
+  position: sticky;
+  top: 0;
+  float: right;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--card-border);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  cursor: pointer;
+}
+.pd-close:hover {
+  border-color: var(--cyan);
+}
+.pd-content h3 {
+  font: 700 1.4rem var(--font-head);
+  margin: 0 40px 12px 0;
+}
+.pd-content h4 {
+  font: 600 0.95rem var(--font-head);
+  color: var(--cyan);
+  margin: 18px 0 6px;
+}
+.pd-content p,
+.pd-content li {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+.pd-content ul {
+  padding-left: 20px;
+}
+.pd-content .project-links {
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid var(--card-border);
+}
+.pd-shot {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-top: 6px;
+  border-radius: 12px;
+  border: 1px solid var(--card-border);
+}
+.pd-note {
+  margin-top: 14px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(250, 204, 21, 0.08);
+  border: 1px solid rgba(250, 204, 21, 0.3);
 }
 
 /* ============ Kontak ============ */
@@ -990,6 +1205,22 @@ body {
   font-size: 0.9rem;
   color: var(--cyan);
   min-height: 1.4em;
+}
+.form-status.error {
+  color: #fca5a5;
+}
+.contact-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.contact-actions .btn {
+  justify-content: center;
+  padding-inline: 12px;
+}
+a.info-card {
+  color: inherit;
+  text-decoration: none;
 }
 
 .contact-info {
@@ -1182,7 +1413,7 @@ body {
     gap: 14px;
   }
   .skill-card {
-    padding: 18px 16px;
+    padding: 18px 14px;
   }
   .skill-icon {
     font-size: 1.7rem;
@@ -1190,14 +1421,18 @@ body {
   }
   .skill-card h3 {
     font-size: 0.92rem;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
   }
-  .skill-bar {
-    height: 6px;
+  .skill-stack {
+    gap: 5px;
+    margin-bottom: 10px;
   }
-  .skill-percent {
-    font-size: 0.75rem;
-    margin-top: 6px;
+  .skill-stack span {
+    font-size: 0.62rem;
+    padding: 3px 8px;
+  }
+  .skill-used {
+    font-size: 0.7rem;
   }
 
   /* --- HP: kartu proyek berjejer 2, thumb & teks dipadatkan --- */
@@ -1619,8 +1854,36 @@ body {
 
 /* 📤 Tombol tantang teman */
 .go-share {
-  padding: 10px 24px;
+  padding: 10px 20px;
   font-size: 0.85rem;
+}
+.go-share-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+.game-overlay .name-hint {
+  min-height: 1.2em;
+  margin: -4px 0 0;
+  font-size: 0.78rem;
+  color: #fcd34d;
+}
+.game-overlay .name-hint:empty {
+  display: none;
+}
+.game-overlay .challenge-banner {
+  padding: 6px 14px;
+  border-radius: 999px;
+  font: 600 0.82rem var(--font-head);
+  color: #fde68a;
+  background: rgba(250, 204, 21, 0.1);
+  border: 1px solid rgba(250, 204, 21, 0.4);
+  max-width: none;
+}
+.challenge-banner.hidden,
+.game-overlay:has(.go-result:not(.hidden)) .challenge-banner {
+  display: none;
 }
 
 /* 🚀 Pemilih skin roket */
@@ -1783,7 +2046,7 @@ body {
   }
 }
 
-/* � VIP Mode — Aurora Voyager (easter egg) */
+/* 🌌 VIP Mode — Aurora Voyager (easter egg) */
 .game-frame.vip {
   border-color: rgba(52, 211, 153, 0.45);
   background: radial-gradient(
@@ -2138,6 +2401,7 @@ body {
 .ai-typing { display: flex; align-items: center; gap: 7px; color: rgba(232, 232, 245, .68); font-style: italic; }.ai-thinking-dots { display: inline-flex; gap: 4px; align-items: center; }.ai-thinking-dots i { width: 5px; height: 5px; border-radius: 50%; background: var(--cyan); opacity: .25; animation: ai-think 1.05s ease-in-out infinite; }.ai-thinking-dots i:nth-child(2) { animation-delay: .16s; }.ai-thinking-dots i:nth-child(3) { animation-delay: .32s; } @keyframes ai-think { 50% { opacity: 1; transform: translateY(-2px); } }
 .ai-suggestions { display: flex; gap: 6px; overflow-x: auto; padding: 4px 0 10px; }.ai-suggestions button { white-space: nowrap; padding: 5px 8px; color: #c4b5fd; border: 1px solid rgba(139,92,246,.35); border-radius: 999px; background: rgba(139,92,246,.1); font: 500 .65rem var(--font-body); cursor: pointer; }.ai-suggestions button:hover { border-color: var(--cyan); color: var(--cyan); }
 .ai-form { display: flex; gap: 7px; }.ai-form input { min-width: 0; flex: 1; padding: 10px 12px; color: var(--text); outline: none; border: 1px solid var(--card-border); border-radius: 11px; background: rgba(255,255,255,.05); font: .75rem var(--font-body); }.ai-form input:focus { border-color: var(--cyan); }.ai-form button { width: 42px; border: 0; border-radius: 11px; color: #061018; background: var(--cyan); cursor: pointer; font-size: 1rem; }.ai-note { padding: 8px 2px 0; line-height: 1.35; }
+.ai-offline::after { content: "mode offline · jawaban dari data lokal"; display: block; margin-top: 6px; font-size: .6rem; color: var(--text-muted); font-style: italic; }
 @media (max-width: 520px) { .ai-widget { right: 16px; bottom: 16px; }.ai-launcher span { display: none; }.ai-launcher { padding: 6px; }.ai-panel { bottom: 58px; }.ai-messages { max-height: 45vh; } }
 
 @media (max-width: 900px) {
@@ -2146,5 +2410,14 @@ body {
   }
   .leaderboard {
     max-height: 460px;
+  }
+}
+
+@media (max-width: 520px) {
+  .contact-actions {
+    grid-template-columns: 1fr;
+  }
+  .project-more {
+    margin-left: 0;
   }
 }
