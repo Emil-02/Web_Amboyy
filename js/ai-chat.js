@@ -67,8 +67,41 @@
       a: "Amboyy (Emil-02) adalah mahasiswa Informatika Universitas Muhammadiyah Makassar yang membangun aplikasi mobile & web serta mengeksplorasi AI. Motonya: \"Debug your past, compile your future.\"",
     },
   ];
+  const projects = [...document.querySelectorAll("#projects-grid .project-card")].map(card => {
+    const title = card.querySelector("h3").textContent;
+    const alias = title.includes("Bioskop") ? "bioskop" : title.split(/ [×—]/)[0];
+    return { card, title, alias: normalize(alias) };
+  });
+  let lastProject = null;
+
+  function normalize(text) {
+    return text.toLowerCase().replace(/[^a-z0-9]+/g, "");
+  }
+
+  function projectAnswer(project, question) {
+    const { card, title } = project;
+    const fields = (selector) => [...card.querySelectorAll(selector)]
+      .map(el => el.textContent.trim().replace(/\s+/g, " "));
+    if (/teknologi|stack|dibangun|pakai apa|pake apa|bahasa pemrograman/i.test(question))
+      return title + " memakai " + fields(".project-tags span").join(", ") + ".";
+    if (/fitur|bisa apa/i.test(question))
+      return "Fitur " + title + " mencakup " + fields(".project-detail li").join(", ") + ".";
+    if (/link|tautan|demo|repo|github|source code/i.test(question)) {
+      const links = [...card.querySelectorAll(".project-links a")];
+      const matching = links.filter(link => /repo|github|source code/i.test(question)
+        ? link.hostname === "github.com" : !/demo/i.test(question) || link.hostname !== "github.com");
+      return matching.length ? title + " — " + matching.map(link => link.href).join(" · ")
+        : "Tautan yang kamu minta untuk " + title + " belum tercantum di portofolio.";
+    }
+    return title + " — " + fields(".project-body > p")[0];
+  }
+
   function localAnswer(text) {
     const q = text.toLowerCase();
+    if (/^(hai|halo|hello|pagi|siang|malam)( nova)?[!.? ]*$/.test(q))
+      return "Halo! Aku NOVA. Mau kenal Amboyy, lihat proyeknya, atau cari kontaknya?";
+    if (/domisili|tinggal|lokasi amboyy|asal mana/.test(q)) return "Amboyy berdomisili di Makassar, Indonesia.";
+    if (/github|repositori/.test(q)) return "Proyek publik Amboyy bisa dilihat di https://github.com/Emil-02.";
     const hit = LOCAL.find((item) => item.k.test(q));
     return hit
       ? hit.a
@@ -132,6 +165,9 @@
     if (!message || busy) return;
     busy = true;
     addMessage(message, "user");
+    const namedProject = projects.find(project => normalize(message).includes(project.alias));
+    const followUp = /^(?:(?:lalu|terus|kalau) )?(?:fitur|teknologi|stack|link|tautan|demo|repo|pakai apa|pake apa)/i.test(message);
+    lastProject = namedProject || (followUp ? lastProject : null);
     history.push({ role: "user", content: message });
     input.value = "";
     const pending = addMessage("", "bot", "ai-typing");
@@ -143,19 +179,26 @@
     pending.append(label, dots);
 
     let reply;
-    let offline = false;
-    const minDelay = new Promise((r) => setTimeout(r, 700 + Math.random() * 400));
-    try {
-      if (!ENDPOINTS.length) throw new Error("not-configured");
-      [reply] = await Promise.all([remoteAnswer(), minDelay]);
-    } catch {
-      await minDelay;
-      reply = localAnswer(message);
-      offline = true;
+    let source = "online";
+    const quickQuestion = [...suggestions.querySelectorAll("button")]
+      .some(button => normalize(button.textContent) === normalize(message));
+    const projectFact = /fitur|teknologi|stack|pakai apa|pake apa|link|tautan|repo|demo|github/i.test(message);
+    const overview = lastProject && ["", "apaitu", "ceritakan", "jelaskan", "tentang"]
+      .includes(normalize(message).replace(lastProject.alias, ""));
+    if (quickQuestion || (lastProject && (overview || projectFact))) {
+      reply = lastProject ? projectAnswer(lastProject, message) : localAnswer(message);
+      source = "info portofolio";
+    } else {
+      try {
+        reply = await remoteAnswer();
+      } catch {
+        reply = lastProject ? projectAnswer(lastProject, message) : localAnswer(message);
+        source = "mode lokal";
+      }
     }
     pending.remove();
-    if (statusEl) statusEl.textContent = offline ? "mode lokal" : "online";
-    addMessage(reply, "bot", offline ? "ai-offline" : "");
+    if (statusEl) statusEl.textContent = source;
+    addMessage(reply, "bot", source === "mode lokal" ? "ai-offline" : "");
     history.push({ role: "assistant", content: reply });
     busy = false;
   }
